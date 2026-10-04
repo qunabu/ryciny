@@ -3,6 +3,7 @@ package pl.wojczal.ryciny.ui
 import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -56,12 +57,12 @@ fun SettingsScreen(g: Graph) {
 
         Section("Generowanie rycin (samoloty, psy)")
         Text(
-            "Claude i ElevenLabs nie generują obrazów — potrzebny jest klucz OpenAI albo Google Gemini. " +
+            "Claude i ElevenLabs nie generują obrazów — potrzebny jest klucz OpenAI, Google Gemini albo OpenRouter. " +
                 "Każdy typ samolotu w barwach danej linii i każda rasa psa powstaje raz (ok. 0,04–0,07 USD) i zostaje w pamięci telefonu.",
             style = Italic, color = InkSoft,
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            listOf("openai" to "OpenAI", "gemini" to "Gemini", "none" to "bez generowania").forEach { (k, label) ->
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            listOf("openai" to "OpenAI", "gemini" to "Gemini", "openrouter" to "OpenRouter", "none" to "bez generowania").forEach { (k, label) ->
                 FilterChip(selected = s.imageProvider == k, onClick = { g.settings.update { it.copy(imageProvider = k) } }, label = { Text(label) })
             }
         }
@@ -73,6 +74,10 @@ fun SettingsScreen(g: Graph) {
             "gemini" -> {
                 Secret("Klucz Gemini (AIza…)", s.geminiKey) { v -> g.settings.update { it.copy(geminiKey = v.trim()) } }
                 Field("Model", s.geminiModel) { v -> g.settings.update { it.copy(geminiModel = v.trim()) } }
+            }
+            "openrouter" -> {
+                Secret("Klucz OpenRouter (sk-or-…)", s.openRouterKey) { v -> g.settings.update { it.copy(openRouterKey = v.trim()) } }
+                Field("Model (generujący obrazy)", s.openRouterModel) { v -> g.settings.update { it.copy(openRouterModel = v.trim()) } }
             }
         }
         artError?.let { Text(it, color = Rubric, style = Italic) }

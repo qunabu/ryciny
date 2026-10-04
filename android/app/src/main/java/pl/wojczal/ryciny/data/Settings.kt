@@ -15,11 +15,13 @@ const val HOME_LON = 18.646
 
 @Serializable
 data class Settings(
-    val imageProvider: String = "openai", // openai | gemini | none
+    val imageProvider: String = "openai", // openai | gemini | openrouter | none
     val openAiKey: String = "",
     val openAiModel: String = "gpt-image-1",
     val geminiKey: String = "",
     val geminiModel: String = "gemini-2.5-flash-image",
+    val openRouterKey: String = "",
+    val openRouterModel: String = "google/gemini-2.5-flash-image",
     val birdThreshold: Float = 0.7f,
     val rangeFilter: Boolean = true,
     val barkThreshold: Float = 0.35f,
