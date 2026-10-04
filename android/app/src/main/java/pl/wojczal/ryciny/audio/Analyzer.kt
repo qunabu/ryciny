@@ -44,6 +44,8 @@ class Analyzer(
 
         state.value = state.value.copy(level = Dsp.rms(window), sound = yamnet.classes[top.first], at = at)
         if (aircraft >= AIRCRAFT_THRESHOLD) sky.heard(at)
+        val mower = frames.maxOf { it.scores[Yamnet.LAWN_MOWER] }
+        if (mower >= MOWER_THRESHOLD) store.addMowing(at, mower)
         if (dogScores.max() >= s.barkThreshold) bark(audio16, frames, dogScores, at, s.barkThreshold, s.dogMatch)
     }
 
@@ -97,5 +99,6 @@ class Analyzer(
 
     companion object {
         const val AIRCRAFT_THRESHOLD = 0.25f
+        const val MOWER_THRESHOLD = 0.3f
     }
 }

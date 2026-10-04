@@ -35,12 +35,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import pl.wojczal.ryciny.Graph
 import pl.wojczal.ryciny.data.Bark
+import pl.wojczal.ryciny.data.PlanePass
+import pl.wojczal.ryciny.planes.planeArt
 import java.io.File
 
 private sealed interface Entry { val at: Long }
 private data class BirdEntry(val name: String, val sci: String, val conf: Float, val count: Int, override val at: Long) : Entry
+private data class MowEntry(val from: Long, override val at: Long) : Entry
 private data class BarkEntry(val bark: Bark, val dog: String?, override val at: Long) : Entry
-private data class PlaneEntry(val title: String, val detail: String, val heard: Boolean, override val at: Long) : Entry
+private data class PlaneEntry(val pass: PlanePass, val title: String, val detail: String, val heard: Boolean, override val at: Long) : Entry
 
 /** Everything heard and seen, newest first; unknown barks can be tagged here. */
 @Composable
@@ -48,12 +51,14 @@ fun JournalScreen(g: Graph) {
     val journal by g.store.flow.collectAsState()
     var filter by remember { mutableStateOf("all") }
     var tagging by remember { mutableStateOf<Bark?>(null) }
+    var viewing by remember { mutableStateOf<PlanePass?>(null) }
     val dogs = journal.dogs.associateBy { it.id }
     val entries = buildList<Entry> {
         if (filter in setOf("all", "birds")) journal.birds.forEach { add(BirdEntry(it.name, it.sci, it.conf, it.count, it.lastAt)) }
         if (filter in setOf("all", "dogs")) journal.barks.forEach { add(BarkEntry(it, it.dogId?.let { id -> dogs[id]?.let { d -> "${d.name} (${d.breed})" } }, it.lastAt)) }
+        if (filter == "all") journal.mowing.forEach { add(MowEntry(it.at, it.lastAt)) }
         if (filter in setOf("all", "planes")) journal.planes.forEach {
-            add(PlaneEntry("${it.title} · ${it.callsign}", listOf(it.airline, it.route, "${km(it.minDistKm.toDouble())}" + (it.minAltM?.let { a -> ", $a m" } ?: "")).filter { s -> s.isNotBlank() }.joinToString(" · "), it.heard, it.lastAt))
+            add(PlaneEntry(it, "${it.title} · ${it.callsign}", listOf(it.airline, it.route, "${km(it.minDistKm.toDouble())}" + (it.minAltM?.let { a -> ", $a m" } ?: "")).filter { s -> s.isNotBlank() }.joinToString(" · "), it.heard, it.lastAt))
         }
     }.sortedByDescending { it.at }.take(400)
 
@@ -67,8 +72,11 @@ fun JournalScreen(g: Graph) {
         LazyColumn(Modifier.fillMaxSize()) {
             items(entries) { e ->
                 when (e) {
+                    is MowEntry -> Line(hhmm(e.at), "Sąsiad kosi trawę", "${hhmm(e.from)}–${hhmm(e.at)}")
                     is BirdEntry -> Line(hhmm(e.at), e.name.replaceFirstChar { it.uppercase() }, "${e.sci} · ${(e.conf * 100).toInt()}%" + if (e.count > 1) " · ${e.count}×" else "")
-                    is PlaneEntry -> Line(hhmm(e.at), e.title, e.detail + if (e.heard) " · słyszany" else "")
+                    is PlaneEntry -> Line(hhmm(e.at), e.title, e.detail + if (e.heard) " · słyszany" else "") {
+                        TextButton(onClick = { viewing = e.pass }) { Text("Rycina") }
+                    }
                     is BarkEntry -> BarkLine(g, e.bark, e.dog) { tagging = e.bark }
                 }
                 HorizontalDivider(color = InkSoft.copy(alpha = 0.2f))
@@ -76,6 +84,7 @@ fun JournalScreen(g: Graph) {
         }
     }
     tagging?.let { bark -> TagDialog(g, bark) { tagging = null } }
+    viewing?.let { pass -> PlaneDialog(pass) { viewing = null } }
 }
 
 @Composable
@@ -169,5 +178,26 @@ private fun TagDialog(g: Graph, bark: Bark, onDone: () -> Unit) {
             }) { Text("Zapisz nowego psa") }
         },
         dismissButton = { TextButton(onClick = onDone) { Text("Anuluj") } },
+    )
+}
+
+/** A past plane's engraving: generated on first look if this type and livery has none yet. */
+@Composable
+private fun PlaneDialog(pass: PlanePass, onDone: () -> Unit) {
+    // Passes logged before the type code was kept fall back to their title as the picture's key.
+    val art = planeArt(pass.typeCode.ifBlank { pass.title }, pass.airlineIcao.ifBlank { pass.airline }, pass.title, pass.airline)
+    AlertDialog(
+        onDismissRequest = onDone,
+        containerColor = Paper,
+        text = {
+            Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Engraving(art, height = 200.dp, modifier = Modifier.fillMaxWidth(), placeholder = "rycina w przygotowaniu… (ok. pół minuty)")
+                Caption(pass.title, size = 24)
+                Caption(listOf(pass.airline, pass.callsign).filter { it.isNotBlank() }.joinToString(" · "), size = 16)
+                if (pass.route.isNotBlank()) Caption(pass.route, size = 17, italic = false)
+                Caption("przeleciał o ${hhmm(pass.at)}, najbliżej ${km(pass.minDistKm.toDouble())}", size = 14, color = InkSoft)
+            }
+        },
+        confirmButton = { TextButton(onClick = onDone) { Text("Zamknij") } },
     )
 }

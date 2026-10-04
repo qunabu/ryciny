@@ -29,6 +29,10 @@ import kotlin.math.sqrt
 
 data class Airport(val iata: String, val city: String)
 
+/** The engraving of one aircraft type in one airline's colours: shared by every plane that matches. */
+fun planeArt(typeCode: String, airlineIcao: String, title: String, airline: String) =
+    pl.wojczal.ryciny.art.ArtRequest(pl.wojczal.ryciny.art.Kind.PLANE, "$typeCode-${airlineIcao.ifBlank { "plain" }}", title, airline)
+
 data class Plane(
     val hex: String,
     val callsign: String,
@@ -134,6 +138,8 @@ class Sky(
             minDistKm = p.distKm.toFloat(),
             minAltM = p.altM,
             heard = heard,
+            typeCode = p.typeCode,
+            airlineIcao = p.airlineIcao,
         ),
     )
 

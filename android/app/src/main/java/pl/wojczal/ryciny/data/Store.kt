@@ -62,6 +62,17 @@ data class PlanePass(
     val minDistKm: Float,
     val minAltM: Int?,
     val heard: Boolean = false,
+    val typeCode: String = "",
+    val airlineIcao: String = "",
+)
+
+/** The neighbour mowing: one episode until the mower has been quiet for [Store.MOW_GAP_MS]. */
+@Serializable
+data class Mowing(
+    val at: Long,
+    val lastAt: Long,
+    val count: Int = 1,
+    val score: Float,
 )
 
 @Serializable
@@ -70,6 +81,7 @@ data class Journal(
     val barks: List<Bark> = emptyList(),
     val dogs: List<Dog> = emptyList(),
     val planes: List<PlanePass> = emptyList(),
+    val mowing: List<Mowing> = emptyList(),
 )
 
 @OptIn(FlowPreview::class)
@@ -151,6 +163,16 @@ class Store(private val dir: File, scope: CoroutineScope) {
         )
     }
 
+    fun addMowing(at: Long, score: Float) = state.update { j ->
+        val last = j.mowing.lastOrNull()
+        val mowing = if (last != null && at - last.lastAt < MOW_GAP_MS) {
+            j.mowing.dropLast(1) + last.copy(lastAt = at, count = last.count + 1, score = maxOf(last.score, score))
+        } else {
+            j.mowing + Mowing(at, at, 1, score)
+        }
+        j.copy(mowing = mowing.filter { at - it.lastAt < KEEP_MS })
+    }
+
     fun addPlane(pass: PlanePass) = state.update { j ->
         val last = j.planes.lastOrNull { it.hex == pass.hex }
         val planes = if (last != null && pass.at - last.lastAt < PLANE_GAP_MS) {
@@ -163,6 +185,8 @@ class Store(private val dir: File, scope: CoroutineScope) {
                     route = pass.route.ifBlank { it.route },
                     airline = pass.airline.ifBlank { it.airline },
                     title = pass.title.ifBlank { it.title },
+                    typeCode = pass.typeCode.ifBlank { it.typeCode },
+                    airlineIcao = pass.airlineIcao.ifBlank { it.airlineIcao },
                 )
             }
         } else {
@@ -178,6 +202,7 @@ class Store(private val dir: File, scope: CoroutineScope) {
         const val BIRD_GAP_MS = 60_000L
         const val BARK_GAP_MS = 30_000L
         const val PLANE_GAP_MS = 10 * 60_000L
+        const val MOW_GAP_MS = 5 * 60_000L
         const val KEEP_MS = 7 * 24 * 3600_000L
         const val MAX_BARKS = 300
         const val MAX_PLANES = 500

@@ -7,10 +7,12 @@ i rysuje na „papierze” XIX-wieczne ryciny tego, co się dzieje wokół domu:
 - **samolot**, który właśnie przelatuje: typ, linia, rejestracja, trasa skąd-dokąd, wysokość i odległość
   (dane ADS-B z adsb.lol + adsbdb),
 - **psy**, które szczekają w okolicy: wykrywanie szczekania (YAMNet), rozpoznawanie konkretnych psów
-  z sąsiedztwa i ich ras.
+  z sąsiedztwa i ich ras,
+- **sąsiada z kosiarką**: YAMNet ma osobną klasę *Lawn mower*, a koszenie ma własną rycinę
+  z XIX-wiecznego poradnika ogrodniczego.
 
-Na ekranie jest zawsze **jedna rycina**: najnowsza rzecz z trzech (samolot nad głową, ostatni ptak,
-ostatni pies). Dotknięcie przełącza na następną, a gdy pojawi się coś nowego, ekran wraca do niej.
+Na ekranie jest zawsze **jedna rycina**: najnowsza rzecz z czterech (samolot nad głową, ostatni ptak,
+ostatni pies, koszenie trawy). Dotknięcie przełącza na następną, a gdy pojawi się coś nowego, ekran wraca do niej.
 
 Etap 1 to aplikacja na Androida do testów. Etap 2 to Raspberry Pi z kolorowym ekranem e-ink, jak w fugleramme.
 
@@ -54,8 +56,10 @@ więc aplikacja generuje je w tym samym stylu:
 - **Claude (Anthropic) i ElevenLabs nie generują obrazów**, ich klucze tu nie pomogą.
 - Działa klucz **OpenAI** (`gpt-image-1`) albo **Google Gemini** (`gemini-2.5-flash-image`).
   Wpisz go w Ustawieniach.
-- Każdy typ samolotu w barwach danej linii (np. Embraer E175 LOT) i każda rasa psa powstaje raz
-  i zostaje w telefonie. Rycina kosztuje ok. 0,04–0,07 USD. Przy lotnisku w Gdańsku to kilkadziesiąt
+- Każdy typ samolotu w barwach danej linii (np. Embraer E175 LOT), każda rasa psa i kosiarka powstają raz
+  i zostają w telefonie. Nic nie jest generowane drugi raz: zamówiony obraz dokańcza się nawet po przełączeniu
+  ekranu, a oryginał z API jest zapisywany przed wycinaniem tła. Ryciny minionych samolotów można też
+  wygenerować z Dziennika (przycisk „Rycina” przy samolocie). Rycina kosztuje ok. 0,04–0,07 USD. Przy lotnisku w Gdańsku to kilkadziesiąt
   kombinacji, czyli w sumie kilka dolarów.
 - Wygenerowany obraz jest wycinany z tła (PNG z przezroczystością, maks. 1200 px), czyli ma ten sam format
   co tablice fugleramme.

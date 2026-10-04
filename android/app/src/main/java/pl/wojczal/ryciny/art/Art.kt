@@ -5,6 +5,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,7 +31,7 @@ import pl.wojczal.ryciny.data.SettingsStore
 import pl.wojczal.ryciny.data.json
 import java.io.File
 
-enum class Kind(val dir: String) { BIRD("birds"), PLANE("planes"), DOG("dogs") }
+enum class Kind(val dir: String) { BIRD("birds"), PLANE("planes"), DOG("dogs"), SCENE("scenes") }
 
 /**
  * One engraving to show. [key] names the cached file, so every plane of one type in
@@ -39,7 +41,7 @@ data class ArtRequest(val kind: Kind, val key: String, val subject: String, val 
 
 /**
  * Birds come from fugleramme's hand-cut 1800s plates (CC BY-SA 4.0), downloaded once
- * per species. Aircraft, dogs and birds fugleramme has no plate for are generated in
+ * per species. Aircraft, dogs, the neighbour's mower and birds fugleramme has no plate for are generated in
  * the same style by an image model, cut out of their paper and cached for good.
  */
 class Art(private val context: Context, private val settings: SettingsStore, private val scope: CoroutineScope) {
@@ -47,6 +49,7 @@ class Art(private val context: Context, private val settings: SettingsStore, pri
     private val lock = Mutex()
     private val failedAt = HashMap<String, Long>()
     private val noPlate = HashSet<String>()
+    private val inflight = HashMap<String, Deferred<File?>>()
     private val style: JsonObject by lazy { json.parseToJsonElement(asset("style.json")).jsonObject }
     private val aliases: Map<String, String> by lazy {
         json.parseToJsonElement(asset("birdnet_aliases.json")).jsonObject.mapValues { it.value.jsonPrimitive.content }
@@ -57,7 +60,7 @@ class Art(private val context: Context, private val settings: SettingsStore, pri
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
-    val generatedDirs: List<File> get() = listOf(Kind.PLANE, Kind.DOG).map { File(root, it.dir) } + File(root, "birds-generated")
+    val generatedDirs: List<File> get() = listOf(Kind.PLANE, Kind.DOG, Kind.SCENE).map { File(root, it.dir) } + File(root, "birds-generated")
 
     fun cached(req: ArtRequest): File? = candidates(req).firstOrNull { it.exists() }
 
@@ -94,23 +97,46 @@ class Art(private val context: Context, private val settings: SettingsStore, pri
         }
     }
 
-    private suspend fun generate(req: ArtRequest): File? = lock.withLock {
+    /**
+     * Each picture is paid for once. The request runs in the app's scope, not the screen's, so
+     * tapping to the next plate mid-generation cannot throw away an image OpenAI already billed;
+     * a second caller for the same picture waits on the first. The image as it came from the API
+     * is kept in `source/` before cutting, so a failed cut is redone from it rather than re-bought.
+     */
+    private suspend fun generate(req: ArtRequest): File? {
         val target = if (req.kind == Kind.BIRD) candidates(req)[1] else candidates(req)[0]
         if (target.exists()) return target
+        val job = synchronized(inflight) {
+            inflight.getOrPut(target.path) {
+                scope.async { lock.withLock { produce(req, target) } }
+                    .also { it.invokeOnCompletion { synchronized(inflight) { inflight.remove(target.path) } } }
+            }
+        }
+        return job.await()
+    }
+
+    private suspend fun produce(req: ArtRequest, target: File): File? {
+        if (target.exists()) return target
+        val source = File(root, "source/${target.parentFile!!.name}/${target.name}")
         val s = settings.value
-        if (s.imageProvider == "none" || recentlyFailed("gen:${req.key}")) return null
-        val wide = req.kind == Kind.PLANE
-        val prompt = prompt(req)
-        try {
-            val bytes = when (s.imageProvider) {
-                "gemini" -> gemini(s.geminiKey, s.geminiModel, prompt, wide)
-                else -> openAi(s.openAiKey, s.openAiModel, prompt, wide)
-            } ?: return null
+        if (!source.exists() && (s.imageProvider == "none" || recentlyFailed("gen:${req.key}"))) return null
+        return try {
+            if (!source.exists()) {
+                val wide = req.kind == Kind.PLANE
+                val bytes = when (s.imageProvider) {
+                    "gemini" -> gemini(s.geminiKey, s.geminiModel, prompt(req), wide)
+                    else -> openAi(s.openAiKey, s.openAiModel, prompt(req), wide)
+                } ?: return null
+                source.parentFile?.mkdirs()
+                source.writeBytes(bytes)
+            }
             withContext(Dispatchers.Default) {
-                val raw = BitmapFactory.decodeByteArray(bytes, 0, bytes.size) ?: error("Nieczytelny obraz")
+                val raw = BitmapFactory.decodeFile(source.path) ?: error("Nieczytelny obraz")
                 val cut = Cutout.fromPaper(raw)
                 target.parentFile?.mkdirs()
-                target.outputStream().use { cut.compress(Bitmap.CompressFormat.PNG, 100, it) }
+                val tmp = File(target.path + ".tmp")
+                tmp.outputStream().use { cut.compress(Bitmap.CompressFormat.PNG, 100, it) }
+                tmp.renameTo(target)
             }
             _error.value = null
             _version.update { it + 1 }
@@ -122,6 +148,13 @@ class Art(private val context: Context, private val settings: SettingsStore, pri
         }
     }
 
+    /** How many pictures are cached on the phone, and how many of them were generated. */
+    fun counts(): Pair<Int, Int> {
+        val all = listOf("birds", "birds-generated", "planes", "dogs", "scenes").sumOf { File(root, it).list()?.size ?: 0 }
+        val generated = generatedDirs.sumOf { it.list()?.size ?: 0 }
+        return all to generated
+    }
+
     fun prompt(req: ArtRequest): String {
         fun t(key: String) = style[key]?.jsonPrimitive?.contentOrNull.orEmpty()
         val subject = when (req.kind) {
@@ -129,6 +162,7 @@ class Art(private val context: Context, private val settings: SettingsStore, pri
                 .replace("{livery}", if (req.airline.isBlank()) "" else t("livery").replace("{airline}", req.airline))
             Kind.DOG -> t("dog").replace("{breed}", req.subject)
             Kind.BIRD -> t("bird").replace("{bird}", "the bird species ${req.subject}")
+            Kind.SCENE -> t(req.key)
         }
         return "${t("base")} $subject"
     }

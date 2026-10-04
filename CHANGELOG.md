@@ -3,6 +3,12 @@
 Numeracja: `MAJOR.MINOR.PATCH` (semver). Wersja jest w `android/gradle.properties` (`ryciny.version`),
 tag w gicie to `vX.Y.Z`, a każdy tag ma release z plikiem APK.
 
+## 0.2.0 - 2026-10-04
+
+- Kosiarka: YAMNet wykrywa koszenie trawy u sąsiada, a rycina pokazuje je jako tablicę z XIX-wiecznego poradnika ogrodniczego.
+- Dziennik: przy każdym samolocie jest przycisk „Rycina”, który pokazuje rycinę tego typu w barwach linii (i ją generuje, jeśli jeszcze jej nie ma).
+- Ryciny nie są generowane dwa razy: generowanie dokańcza się nawet po przełączeniu ekranu, oryginał z API jest zapisywany przed wycinaniem tła, a w Ustawieniach widać, ile rycin jest w pamięci.
+
 ## 0.1.0 - 2026-10-04
 
 Pierwsza wersja testowa na Androida.

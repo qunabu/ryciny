@@ -70,6 +70,9 @@ fun SettingsScreen(g: Graph) {
             }
         }
         artError?.let { Text(it, color = Rubric, style = Italic) }
+        val artVersion by g.art.version.collectAsState()
+        val (cached, generated) = androidx.compose.runtime.remember(artVersion) { g.art.counts() }
+        Text("Ryciny w pamięci telefonu: $cached, w tym wygenerowanych: $generated. Żadna nie jest generowana drugi raz.", color = InkSoft)
 
         Section("Miejsce")
         Toggle("Używaj lokalizacji telefonu", s.useGps) { v -> g.settings.update { it.copy(useGps = v) }; scope.launch { g.place.refresh() } }

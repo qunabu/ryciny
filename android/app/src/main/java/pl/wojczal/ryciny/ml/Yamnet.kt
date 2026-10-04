@@ -35,6 +35,7 @@ class Yamnet(context: Context) {
     companion object {
         const val SAMPLES = 15_600
         val DOG = 69..75 // Dog, Bark, Yip, Howl, Bow-wow, Growling, Whimper (dog)
+        const val LAWN_MOWER = 340
         val AIRCRAFT = 329..334 // Aircraft, Aircraft engine, Jet engine, Propeller, Helicopter, Fixed-wing aircraft
     }
 }
