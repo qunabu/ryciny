@@ -7,12 +7,34 @@ import kotlinx.serialization.builtins.ListSerializer
 @Serializable
 data class Breed(val pl: String, val en: String)
 
+/** A sound with its own engraving, from shared/sounds.json. */
+@Serializable
+data class Sound(
+    val key: String,
+    val now: String,
+    val past: String,
+    val classes: List<Int>,
+    val threshold: Float,
+    val prompt: String,
+)
+
+@Serializable
+private data class SoundFile(val sounds: List<Sound>)
+
 /** Static lists shipped in assets (shared/ in the repo, so the Pi reads the same ones). */
 class Catalog(context: Context) {
     val breeds: List<Breed> = json.decodeFromString(
         ListSerializer(Breed.serializer()),
         context.assets.open("dog_breeds.json").bufferedReader().readText(),
     )
+
+    val sounds: List<Sound> = json.decodeFromString(
+        SoundFile.serializer(),
+        context.assets.open("sounds.json").bufferedReader().readText(),
+    ).sounds
+    private val soundsByKey = sounds.associateBy { it.key }
+
+    fun sound(key: String): Sound? = soundsByKey[key]
 
     /** Body mass in grams per scientific name, from fugleramme's bird_sizes.csv. */
     val birdMass: Map<String, Double> = context.assets.open("bird_sizes.csv").bufferedReader().readLines().drop(1)

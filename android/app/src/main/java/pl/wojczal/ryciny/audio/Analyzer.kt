@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import pl.wojczal.ryciny.data.Bark
 import pl.wojczal.ryciny.data.Place
 import pl.wojczal.ryciny.data.SettingsStore
+import pl.wojczal.ryciny.data.Sound
 import pl.wojczal.ryciny.data.Store
 import pl.wojczal.ryciny.ml.BirdNet
 import pl.wojczal.ryciny.ml.Yamnet
@@ -29,6 +30,7 @@ class Analyzer(
     private val store: Store,
     private val sky: Sky,
     private val state: MutableStateFlow<Live>,
+    private val sounds: List<Sound>,
 ) {
     private val birdNet = BirdNet(context)
     private val yamnet = Yamnet(context)
@@ -44,8 +46,10 @@ class Analyzer(
 
         state.value = state.value.copy(level = Dsp.rms(window), sound = yamnet.classes[top.first], at = at)
         if (aircraft >= AIRCRAFT_THRESHOLD) sky.heard(at)
-        val mower = frames.maxOf { it.scores[Yamnet.LAWN_MOWER] }
-        if (mower >= MOWER_THRESHOLD) store.addMowing(at, mower)
+        sounds.forEach { sound ->
+            val score = frames.maxOf { f -> sound.classes.maxOf { f.scores[it] } }
+            if (score >= sound.threshold) store.addSound(sound.key, at, score)
+        }
         if (dogScores.max() >= s.barkThreshold) bark(audio16, frames, dogScores, at, s.barkThreshold, s.dogMatch)
     }
 
@@ -99,6 +103,5 @@ class Analyzer(
 
     companion object {
         const val AIRCRAFT_THRESHOLD = 0.25f
-        const val MOWER_THRESHOLD = 0.3f
     }
 }

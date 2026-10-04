@@ -1,0 +1,344 @@
+{
+ "about": "Sounds YAMNet hears that get their own engraving. classes are YAMNet (AudioSet) indices from yamnet_class_map.csv; an event fires when any of them scores at least threshold in a 3 s window. Speech, crying and other human sounds are left out on purpose: this frame listens to nature and the street, not to the neighbours themselves.",
+ "sounds": [
+  {
+   "key": "mower",
+   "now": "Sąsiad kosi trawę",
+   "past": "Sąsiad kosił trawę",
+   "classes": [
+    340
+   ],
+   "threshold": 0.3,
+   "prompt": "Subject: a gardener in shirtsleeves pushing a modern petrol lawn mower across a narrow strip of freshly cut lawn, a few blades of grass flying, drawn like a plate in a Victorian treatise on gardening implements, the mower drawn with engineering precision."
+  },
+  {
+   "key": "chainsaw",
+   "now": "Ktoś tnie piłą łańcuchową",
+   "past": "Ktoś ciął piłą łańcuchową",
+   "classes": [
+    341
+   ],
+   "threshold": 0.35,
+   "prompt": "Subject: a woodsman cutting a log with a modern chainsaw, wood chips flying, drawn like a plate in a Victorian treatise on forestry tools."
+  },
+  {
+   "key": "tools",
+   "now": "Sąsiad majsterkuje",
+   "past": "Sąsiad majsterkował",
+   "classes": [
+    418,
+    419,
+    414,
+    413,
+    415
+   ],
+   "threshold": 0.4,
+   "prompt": "Subject: a still life of carpenter's tools - a power drill, a hammer, a hand saw and a few nails on a short wooden plank, drawn like a plate in a Victorian manual of the mechanical arts."
+  },
+  {
+   "key": "storm",
+   "now": "Burza",
+   "past": "Przeszła burza",
+   "classes": [
+    280,
+    281
+   ],
+   "threshold": 0.3,
+   "prompt": "Subject: a dramatic thundercloud with a forked bolt of lightning striking down, drawn like a plate in a Victorian atlas of meteorology."
+  },
+  {
+   "key": "rain",
+   "now": "Pada deszcz",
+   "past": "Padał deszcz",
+   "classes": [
+    283,
+    284,
+    285
+   ],
+   "threshold": 0.4,
+   "prompt": "Subject: a rain cloud with slanting lines of rain falling from it and a few large raindrops, drawn like a plate in a Victorian atlas of meteorology."
+  },
+  {
+   "key": "wind",
+   "now": "Wieje wiatr",
+   "past": "Wiało",
+   "classes": [
+    277
+   ],
+   "threshold": 0.5,
+   "prompt": "Subject: a young birch tree bending in a strong gust of wind with leaves torn off and flying, drawn like a plate in a Victorian atlas of meteorology."
+  },
+  {
+   "key": "ship",
+   "now": "Statek",
+   "past": "Słychać było statek",
+   "classes": [
+    295,
+    299,
+    395,
+    298,
+    296
+   ],
+   "threshold": 0.35,
+   "prompt": "Subject: a steam merchant ship with a single funnel and two masts sailing on a short band of waves, as in a Victorian maritime engraving of the port of Danzig."
+  },
+  {
+   "key": "bells",
+   "now": "Biją dzwony",
+   "past": "Biły dzwony",
+   "classes": [
+    196
+   ],
+   "threshold": 0.35,
+   "prompt": "Subject: a large bronze church bell hanging in a wooden belfry frame, swinging, drawn like a plate in a Victorian treatise on bell founding."
+  },
+  {
+   "key": "train",
+   "now": "Pociąg",
+   "past": "Przejechał pociąg",
+   "classes": [
+    323,
+    322,
+    324,
+    325,
+    327,
+    326
+   ],
+   "threshold": 0.35,
+   "prompt": "Subject: a passenger train with a locomotive and two carriages seen from the side, drawn like a plate in a Victorian treatise on railways, a modern electric locomotive drawn in the engraving style."
+  },
+  {
+   "key": "motorcycle",
+   "now": "Motocykl",
+   "past": "Przejechał motocykl",
+   "classes": [
+    320
+   ],
+   "threshold": 0.4,
+   "prompt": "Subject: a motorcycle seen exactly from the side, drawn like a plate in a Victorian treatise on engineering."
+  },
+  {
+   "key": "helicopter",
+   "now": "Helikopter",
+   "past": "Przeleciał helikopter",
+   "classes": [
+    333
+   ],
+   "threshold": 0.35,
+   "prompt": "Subject: a helicopter in flight seen from the side, drawn like a plate in a Victorian treatise on engineering."
+  },
+  {
+   "key": "ambulance",
+   "now": "Karetka na sygnale",
+   "past": "Przejechała karetka",
+   "classes": [
+    318
+   ],
+   "threshold": 0.35,
+   "prompt": "Subject: an ambulance van with its lights on, seen from the side, drawn like a plate in a Victorian treatise on carriages."
+  },
+  {
+   "key": "police",
+   "now": "Policja na sygnale",
+   "past": "Przejechała policja",
+   "classes": [
+    317
+   ],
+   "threshold": 0.35,
+   "prompt": "Subject: a police car with its lights on, seen from the side, drawn like a plate in a Victorian treatise on carriages."
+  },
+  {
+   "key": "fire",
+   "now": "Straż pożarna na sygnale",
+   "past": "Przejechała straż pożarna",
+   "classes": [
+    319
+   ],
+   "threshold": 0.35,
+   "prompt": "Subject: a red fire engine with a ladder, seen from the side, drawn like a plate in a Victorian treatise on fire engines."
+  },
+  {
+   "key": "siren",
+   "now": "Syrena alarmowa",
+   "past": "Wyła syrena",
+   "classes": [
+    391
+   ],
+   "threshold": 0.4,
+   "prompt": "Subject: an old civil defence siren on top of a short pole, drawn like a plate in a Victorian treatise on engineering."
+  },
+  {
+   "key": "fireworks",
+   "now": "Fajerwerki",
+   "past": "Strzelały fajerwerki",
+   "classes": [
+    426,
+    427
+   ],
+   "threshold": 0.35,
+   "prompt": "Subject: bursts of fireworks spreading in star shapes with trailing sparks, drawn like a plate in a Victorian book of pyrotechnics, sparks coloured in muted gold and red."
+  },
+  {
+   "key": "caralarm",
+   "now": "Alarm samochodowy",
+   "past": "Wył alarm samochodowy",
+   "classes": [
+    304
+   ],
+   "threshold": 0.4,
+   "prompt": "Subject: a small modern car seen from the side with its indicator lights flashing, drawn like a plate in a Victorian treatise on carriages."
+  },
+  {
+   "key": "cat",
+   "now": "Kot",
+   "past": "Słychać było kota",
+   "classes": [
+    76,
+    78,
+    77,
+    80,
+    79
+   ],
+   "threshold": 0.35,
+   "prompt": "Subject: a domestic tabby cat sitting in profile with its tail curled around its paws, drawn like a plate in a Victorian natural history of domestic animals."
+  },
+  {
+   "key": "rooster",
+   "now": "Kogut",
+   "past": "Piał kogut",
+   "classes": [
+    94,
+    96
+   ],
+   "threshold": 0.35,
+   "prompt": "Subject: a proud rooster crowing, standing in profile, drawn like a plate in a Victorian book of poultry."
+  },
+  {
+   "key": "horse",
+   "now": "Koń",
+   "past": "Słychać było konia",
+   "classes": [
+    82,
+    84,
+    83
+   ],
+   "threshold": 0.35,
+   "prompt": "Subject: a horse standing in profile, drawn like a plate in a Victorian book of horse breeds."
+  },
+  {
+   "key": "cow",
+   "now": "Krowa",
+   "past": "Muczała krowa",
+   "classes": [
+    85,
+    86
+   ],
+   "threshold": 0.35,
+   "prompt": "Subject: a dairy cow standing in profile, drawn like a plate in a Victorian book of cattle breeds."
+  },
+  {
+   "key": "sheep",
+   "now": "Owca",
+   "past": "Beczała owca",
+   "classes": [
+    92,
+    91
+   ],
+   "threshold": 0.35,
+   "prompt": "Subject: a sheep standing in profile, drawn like a plate in a Victorian book of livestock."
+  },
+  {
+   "key": "goat",
+   "now": "Koza",
+   "past": "Beczała koza",
+   "classes": [
+    90
+   ],
+   "threshold": 0.35,
+   "prompt": "Subject: a goat standing in profile, drawn like a plate in a Victorian book of livestock."
+  },
+  {
+   "key": "pig",
+   "now": "Świnia",
+   "past": "Chrumkała świnia",
+   "classes": [
+    88,
+    89
+   ],
+   "threshold": 0.35,
+   "prompt": "Subject: a pig standing in profile, drawn like a plate in a Victorian book of livestock."
+  },
+  {
+   "key": "frog",
+   "now": "Żaby rechoczą",
+   "past": "Rechotały żaby",
+   "classes": [
+    127,
+    128
+   ],
+   "threshold": 0.35,
+   "prompt": "Subject: a green frog sitting on a lily pad, drawn like a plate in a Victorian natural history of amphibians."
+  },
+  {
+   "key": "cricket",
+   "now": "Świerszcze grają",
+   "past": "Grały świerszcze",
+   "classes": [
+    122
+   ],
+   "threshold": 0.35,
+   "prompt": "Subject: a field cricket shown large in profile, drawn like a plate in a Victorian entomology book."
+  },
+  {
+   "key": "bee",
+   "now": "Pszczoły i osy",
+   "past": "Brzęczały pszczoły",
+   "classes": [
+    126
+   ],
+   "threshold": 0.4,
+   "prompt": "Subject: a honey bee and a wasp shown large, with a sprig of clover, drawn like a plate in a Victorian entomology book."
+  },
+  {
+   "key": "mosquito",
+   "now": "Komar",
+   "past": "Bzyczał komar",
+   "classes": [
+    123
+   ],
+   "threshold": 0.45,
+   "prompt": "Subject: a mosquito shown very large in profile, drawn like a plate in a Victorian entomology book."
+  },
+  {
+   "key": "music",
+   "now": "Muzyka u sąsiadów",
+   "past": "Grała muzyka",
+   "classes": [
+    132
+   ],
+   "threshold": 0.6,
+   "prompt": "Subject: a gramophone with a large brass horn, drawn like a plate in a Victorian catalogue of musical instruments."
+  },
+  {
+   "key": "doorbell",
+   "now": "Dzwonek do drzwi",
+   "past": "Ktoś dzwonił do drzwi",
+   "classes": [
+    349,
+    350
+   ],
+   "threshold": 0.45,
+   "prompt": "Subject: a brass door bell push on a wooden door frame, drawn like a plate in a Victorian ironmonger's catalogue."
+  },
+  {
+   "key": "icecream",
+   "now": "Lodziarz",
+   "past": "Przejechał lodziarz",
+   "classes": [
+    314
+   ],
+   "threshold": 0.4,
+   "prompt": "Subject: a small ice cream van seen from the side, drawn like a plate in a Victorian treatise on carriages."
+  }
+ ]
+}

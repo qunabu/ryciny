@@ -30,7 +30,8 @@ import pl.wojczal.ryciny.audio.ListenService
 import pl.wojczal.ryciny.data.Bark
 import pl.wojczal.ryciny.data.BirdHit
 import pl.wojczal.ryciny.data.Dog
-import pl.wojczal.ryciny.data.Mowing
+import pl.wojczal.ryciny.data.Sound
+import pl.wojczal.ryciny.data.SoundEvent
 import pl.wojczal.ryciny.planes.Plane
 import pl.wojczal.ryciny.planes.planeArt
 import java.text.SimpleDateFormat
@@ -55,11 +56,11 @@ fun rememberNow(): Long {
     return now
 }
 
-/** One thing to draw: the newest of the plane overhead, the last bird, the last dog and the neighbour's mower. */
+/** One thing to draw: the plane overhead, the last bird, the last dog, or the last of each sound in sounds.json. */
 private sealed interface Subject { val at: Long }
 private data class PlaneSubject(val plane: Plane, override val at: Long) : Subject
 private data class BirdSubject(val bird: BirdHit, val count: Int, override val at: Long) : Subject
-private data class MowerSubject(val mowing: Mowing, override val at: Long) : Subject
+private data class SoundSubject(val sound: Sound, val event: SoundEvent, override val at: Long) : Subject
 private data class DogSubject(val dog: Dog?, val barks: List<Bark>, override val at: Long) : Subject
 
 /** The page itself: one engraving, of whatever was seen or heard most recently. Tap for the next. */
@@ -85,7 +86,10 @@ fun PlateScreen(g: Graph) {
             val same = journal.barks.filter { it.lastAt >= since && it.dogId == last.dogId && (last.dogId != null || it.size == last.size) }
             add(DogSubject(journal.dogs.firstOrNull { it.id == last.dogId }, same, last.lastAt))
         }
-        journal.mowing.lastOrNull()?.takeIf { it.lastAt >= since }?.let { add(MowerSubject(it, it.lastAt)) }
+        // The latest stretch of each sound heard (mowing, a storm, a ship...), each its own plate.
+        journal.sounds.filter { it.lastAt >= since }.groupBy { it.key }.values.map { it.maxBy { e -> e.lastAt } }.forEach { e ->
+            g.catalog.sound(e.key)?.let { add(SoundSubject(it, e, e.lastAt)) }
+        }
     }.sortedByDescending { it.at }
 
     var offset by remember { mutableIntStateOf(0) }
@@ -108,7 +112,7 @@ fun PlateScreen(g: Graph) {
                 is PlaneSubject -> PlanePlate(subject.plane, now - sky.heardAt < 20_000)
                 is BirdSubject -> BirdPlate(subject.bird, subject.count)
                 is DogSubject -> DogPlate(g, subject.dog, subject.barks)
-                is MowerSubject -> MowerPlate(subject.mowing, now)
+                is SoundSubject -> SoundPlate(subject.sound, subject.event, now)
                 null -> Caption(
                     if (sky.error != null) "Brak danych ADS-B (${sky.error})" else "Cisza: nic nie przeleciało, nie zaśpiewało ani nie zaszczekało",
                     color = InkSoft, modifier = Modifier.padding(vertical = 80.dp),
@@ -196,10 +200,10 @@ private fun LiveStrip(listening: Boolean, sound: String, error: String?) {
 }
 
 @Composable
-private fun MowerPlate(m: Mowing, now: Long) {
-    Engraving(ArtRequest(Kind.SCENE, "mower", "kosiarka"), height = 260.dp, modifier = Modifier.fillMaxWidth())
-    val still = now - m.lastAt < 2 * 60_000L
-    Caption(if (still) "Sąsiad kosi trawę" else "Sąsiad kosił trawę", size = 28, italic = false)
-    val minutes = ((m.lastAt - m.at) / 60_000L).coerceAtLeast(1)
-    Caption(if (still) "od ${hhmm(m.at)} · już $minutes min" else "${hhmm(m.at)}–${hhmm(m.lastAt)} · $minutes min", size = 15, color = InkSoft)
+private fun SoundPlate(sound: Sound, e: SoundEvent, now: Long) {
+    Engraving(ArtRequest(Kind.SCENE, sound.key, sound.now, prompt = sound.prompt), height = 260.dp, modifier = Modifier.fillMaxWidth())
+    val still = now - e.lastAt < 2 * 60_000L
+    Caption(if (still) sound.now else sound.past, size = 28, italic = false)
+    val minutes = ((e.lastAt - e.at) / 60_000L).coerceAtLeast(1)
+    Caption(if (still) "od ${hhmm(e.at)} · już $minutes min" else "${hhmm(e.at)}–${hhmm(e.lastAt)} · $minutes min", size = 15, color = InkSoft)
 }

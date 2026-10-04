@@ -29,7 +29,7 @@ object Export {
             val journal = g.store.value
             put("dogs.json", json.encodeToString(kotlinx.serialization.builtins.ListSerializer(Dog.serializer()), journal.dogs).toByteArray())
             put("journal.json", json.encodeToString(Journal.serializer(), journal.copy(barks = journal.barks.map { it.copy(embedding = emptyList()) })).toByteArray())
-            listOf("style.json", "dog_breeds.json", "aircraft_types.json").forEach { put(it, g.context.assets.open(it).readBytes()) }
+            listOf("style.json", "sounds.json", "dog_breeds.json", "aircraft_types.json").forEach { put(it, g.context.assets.open(it).readBytes()) }
         }
         zip
     }

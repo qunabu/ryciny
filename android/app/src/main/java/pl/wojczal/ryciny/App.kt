@@ -37,7 +37,7 @@ class Graph(val context: Context) {
     val live = MutableStateFlow(Live())
 
     /** Loads ~80 MB of models: touch it off the main thread only. */
-    val analyzer by lazy { Analyzer(context, settings, place, store, sky, live) }
+    val analyzer by lazy { Analyzer(context, settings, place, store, sky, live, catalog.sounds) }
 }
 
 val Context.graph: Graph get() = (applicationContext as App).graph

@@ -66,7 +66,17 @@ data class PlanePass(
     val airlineIcao: String = "",
 )
 
-/** The neighbour mowing: one episode until the mower has been quiet for [Store.MOW_GAP_MS]. */
+/** One stretch of a sound from shared/sounds.json (mowing, a storm, a ship...), until it has been quiet for [Store.SOUND_GAP_MS]. */
+@Serializable
+data class SoundEvent(
+    val key: String,
+    val at: Long,
+    val lastAt: Long,
+    val count: Int = 1,
+    val score: Float,
+)
+
+/** Written by 0.2.0, read once to carry its mowing over into [SoundEvent]s. */
 @Serializable
 data class Mowing(
     val at: Long,
@@ -81,6 +91,7 @@ data class Journal(
     val barks: List<Bark> = emptyList(),
     val dogs: List<Dog> = emptyList(),
     val planes: List<PlanePass> = emptyList(),
+    val sounds: List<SoundEvent> = emptyList(),
     val mowing: List<Mowing> = emptyList(),
 )
 
@@ -163,14 +174,14 @@ class Store(private val dir: File, scope: CoroutineScope) {
         )
     }
 
-    fun addMowing(at: Long, score: Float) = state.update { j ->
-        val last = j.mowing.lastOrNull()
-        val mowing = if (last != null && at - last.lastAt < MOW_GAP_MS) {
-            j.mowing.dropLast(1) + last.copy(lastAt = at, count = last.count + 1, score = maxOf(last.score, score))
+    fun addSound(key: String, at: Long, score: Float) = state.update { j ->
+        val last = j.sounds.lastOrNull { it.key == key }
+        val sounds = if (last != null && at - last.lastAt < SOUND_GAP_MS) {
+            j.sounds.map { if (it === last) it.copy(lastAt = at, count = it.count + 1, score = maxOf(it.score, score)) else it }
         } else {
-            j.mowing + Mowing(at, at, 1, score)
+            j.sounds + SoundEvent(key, at, at, 1, score)
         }
-        j.copy(mowing = mowing.filter { at - it.lastAt < KEEP_MS })
+        j.copy(sounds = sounds.filter { at - it.lastAt < KEEP_MS }.takeLast(MAX_SOUNDS))
     }
 
     fun addPlane(pass: PlanePass) = state.update { j ->
@@ -195,14 +206,19 @@ class Store(private val dir: File, scope: CoroutineScope) {
         j.copy(planes = planes.filter { pass.at - it.lastAt < KEEP_MS }.takeLast(MAX_PLANES))
     }
 
-    private fun load(): Journal =
-        runCatching { json.decodeFromString(Journal.serializer(), file.readText()) }.getOrDefault(Journal())
+    private fun load(): Journal {
+        val j = runCatching { json.decodeFromString(Journal.serializer(), file.readText()) }.getOrDefault(Journal())
+        if (j.mowing.isEmpty()) return j
+        val carried = j.mowing.map { SoundEvent("mower", it.at, it.lastAt, it.count, it.score) }
+        return j.copy(sounds = (carried + j.sounds).sortedBy { it.at }, mowing = emptyList())
+    }
 
     companion object {
         const val BIRD_GAP_MS = 60_000L
         const val BARK_GAP_MS = 30_000L
         const val PLANE_GAP_MS = 10 * 60_000L
-        const val MOW_GAP_MS = 5 * 60_000L
+        const val SOUND_GAP_MS = 5 * 60_000L
+        const val MAX_SOUNDS = 1_000
         const val KEEP_MS = 7 * 24 * 3600_000L
         const val MAX_BARKS = 300
         const val MAX_PLANES = 500

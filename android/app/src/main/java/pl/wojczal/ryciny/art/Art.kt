@@ -37,7 +37,7 @@ enum class Kind(val dir: String) { BIRD("birds"), PLANE("planes"), DOG("dogs"), 
  * One engraving to show. [key] names the cached file, so every plane of one type in
  * one airline's colours shares a single picture, and every beagle shares another.
  */
-data class ArtRequest(val kind: Kind, val key: String, val subject: String, val airline: String = "")
+data class ArtRequest(val kind: Kind, val key: String, val subject: String, val airline: String = "", val prompt: String = "")
 
 /**
  * Birds come from fugleramme's hand-cut 1800s plates (CC BY-SA 4.0), downloaded once
@@ -162,7 +162,7 @@ class Art(private val context: Context, private val settings: SettingsStore, pri
                 .replace("{livery}", if (req.airline.isBlank()) "" else t("livery").replace("{airline}", req.airline))
             Kind.DOG -> t("dog").replace("{breed}", req.subject)
             Kind.BIRD -> t("bird").replace("{bird}", "the bird species ${req.subject}")
-            Kind.SCENE -> t(req.key)
+            Kind.SCENE -> req.prompt
         }
         return "${t("base")} $subject"
     }

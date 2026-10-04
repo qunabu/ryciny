@@ -8,11 +8,14 @@ i rysuje na „papierze” XIX-wieczne ryciny tego, co się dzieje wokół domu:
   (dane ADS-B z adsb.lol + adsbdb),
 - **psy**, które szczekają w okolicy: wykrywanie szczekania (YAMNet), rozpoznawanie konkretnych psów
   z sąsiedztwa i ich ras,
-- **sąsiada z kosiarką**: YAMNet ma osobną klasę *Lawn mower*, a koszenie ma własną rycinę
-  z XIX-wiecznego poradnika ogrodniczego.
+- **dźwięki okolicy** (31 rodzajów, YAMNet): kosiarka i piła u sąsiada, burza, deszcz, wiatr, statki i syrena
+  mgłowa z portu, dzwony kościelne, pociąg, motocykl, helikopter, karetka, policja, straż, fajerwerki, kot,
+  kogut, zwierzęta gospodarskie, żaby, świerszcze, pszczoły, muzyka, dzwonek do drzwi, lodziarz. Każdy ma własną
+  rycinę. Pełna lista z progami i promptami jest w [`shared/sounds.json`](shared/sounds.json). Mowa, płacz
+  i inne ludzkie odgłosy są celowo pominięte: ramka słucha przyrody i ulicy, nie sąsiadów.
 
-Na ekranie jest zawsze **jedna rycina**: najnowsza rzecz z czterech (samolot nad głową, ostatni ptak,
-ostatni pies, koszenie trawy). Dotknięcie przełącza na następną, a gdy pojawi się coś nowego, ekran wraca do niej.
+Na ekranie jest zawsze **jedna rycina**: najnowsza rzecz z okolicy (samolot nad głową, ostatni ptak,
+ostatni pies albo ostatni dźwięk, np. kosiarka czy burza). Dotknięcie przełącza na następną, a gdy pojawi się coś nowego, ekran wraca do niej.
 
 Etap 1 to aplikacja na Androida do testów. Etap 2 to Raspberry Pi z kolorowym ekranem e-ink, jak w fugleramme.
 
@@ -56,7 +59,7 @@ więc aplikacja generuje je w tym samym stylu:
 - **Claude (Anthropic) i ElevenLabs nie generują obrazów**, ich klucze tu nie pomogą.
 - Działa klucz **OpenAI** (`gpt-image-1`) albo **Google Gemini** (`gemini-2.5-flash-image`).
   Wpisz go w Ustawieniach.
-- Każdy typ samolotu w barwach danej linii (np. Embraer E175 LOT), każda rasa psa i kosiarka powstają raz
+- Każdy typ samolotu w barwach danej linii (np. Embraer E175 LOT), każda rasa psa i każdy dźwięk okolicy powstają raz
   i zostają w telefonie. Nic nie jest generowane drugi raz: zamówiony obraz dokańcza się nawet po przełączeniu
   ekranu, a oryginał z API jest zapisywany przed wycinaniem tła. Ryciny minionych samolotów można też
   wygenerować z Dziennika (przycisk „Rycina” przy samolocie). Rycina kosztuje ok. 0,04–0,07 USD. Przy lotnisku w Gdańsku to kilkadziesiąt
@@ -101,6 +104,7 @@ Filtr gatunków BirdNET jest liczony dla tego miejsca i tygodnia roku.
 ```
 shared/                 wspólne dla Androida i Pi
   style.json            prompty rycin
+  sounds.json           dźwięki okolicy: klasy YAMNet, progi, prompty
   dog_breeds.json       rasy (pl + en do promptu)
   aircraft_types.json   kody ICAO typów -> nazwy
 android/app/src/main/java/pl/wojczal/ryciny/

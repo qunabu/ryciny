@@ -1,7 +1,9 @@
 package pl.wojczal.ryciny.ui
 
 import android.media.MediaPlayer
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,7 +43,7 @@ import java.io.File
 
 private sealed interface Entry { val at: Long }
 private data class BirdEntry(val name: String, val sci: String, val conf: Float, val count: Int, override val at: Long) : Entry
-private data class MowEntry(val from: Long, override val at: Long) : Entry
+private data class SoundEntry(val title: String, val from: Long, override val at: Long) : Entry
 private data class BarkEntry(val bark: Bark, val dog: String?, override val at: Long) : Entry
 private data class PlaneEntry(val pass: PlanePass, val title: String, val detail: String, val heard: Boolean, override val at: Long) : Entry
 
@@ -56,7 +58,9 @@ fun JournalScreen(g: Graph) {
     val entries = buildList<Entry> {
         if (filter in setOf("all", "birds")) journal.birds.forEach { add(BirdEntry(it.name, it.sci, it.conf, it.count, it.lastAt)) }
         if (filter in setOf("all", "dogs")) journal.barks.forEach { add(BarkEntry(it, it.dogId?.let { id -> dogs[id]?.let { d -> "${d.name} (${d.breed})" } }, it.lastAt)) }
-        if (filter == "all") journal.mowing.forEach { add(MowEntry(it.at, it.lastAt)) }
+        if (filter in setOf("all", "sounds")) journal.sounds.forEach { e ->
+            g.catalog.sound(e.key)?.let { add(SoundEntry(it.past, e.at, e.lastAt)) }
+        }
         if (filter in setOf("all", "planes")) journal.planes.forEach {
             add(PlaneEntry(it, "${it.title} · ${it.callsign}", listOf(it.airline, it.route, "${km(it.minDistKm.toDouble())}" + (it.minAltM?.let { a -> ", $a m" } ?: "")).filter { s -> s.isNotBlank() }.joinToString(" · "), it.heard, it.lastAt))
         }
@@ -64,15 +68,15 @@ fun JournalScreen(g: Graph) {
 
     Column(Modifier.fillMaxSize().paper().padding(horizontal = 18.dp, vertical = 16.dp)) {
         Caption("Dziennik", size = 24, italic = false, modifier = Modifier.fillMaxWidth())
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)) {
-            listOf("all" to "wszystko", "birds" to "ptaki", "dogs" to "psy", "planes" to "samoloty").forEach { (k, label) ->
+        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            listOf("all" to "wszystko", "birds" to "ptaki", "dogs" to "psy", "planes" to "samoloty", "sounds" to "dźwięki").forEach { (k, label) ->
                 FilterChip(selected = filter == k, onClick = { filter = k }, label = { Text(label) })
             }
         }
         LazyColumn(Modifier.fillMaxSize()) {
             items(entries) { e ->
                 when (e) {
-                    is MowEntry -> Line(hhmm(e.at), "Sąsiad kosi trawę", "${hhmm(e.from)}–${hhmm(e.at)}")
+                    is SoundEntry -> Line(hhmm(e.at), e.title, "${hhmm(e.from)}–${hhmm(e.at)}")
                     is BirdEntry -> Line(hhmm(e.at), e.name.replaceFirstChar { it.uppercase() }, "${e.sci} · ${(e.conf * 100).toInt()}%" + if (e.count > 1) " · ${e.count}×" else "")
                     is PlaneEntry -> Line(hhmm(e.at), e.title, e.detail + if (e.heard) " · słyszany" else "") {
                         TextButton(onClick = { viewing = e.pass }) { Text("Rycina") }

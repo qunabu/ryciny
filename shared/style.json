@@ -4,6 +4,5 @@
   "plane": "Subject: {aircraft}{livery}, seen exactly from the side in level flight, wheels retracted, drawn like a plate in a Victorian treatise on engineering, accurate proportions of this aircraft type.",
   "livery": " painted in the colours of the {airline} livery (colours and shapes only, no readable letters or logos)",
   "dog": "Subject: {breed}, standing in full side profile, drawn like a plate in a Victorian book of dog breeds, accurate proportions and coat of this breed.",
-  "bird": "Subject: {bird}, perched on a short bare twig, drawn like a plate in John Gould's Birds of Europe, accurate plumage.",
-  "mower": "Subject: a gardener in shirtsleeves pushing a modern petrol lawn mower across a narrow strip of freshly cut lawn, a few blades of grass flying, drawn like a plate in a Victorian treatise on gardening implements, the mower drawn with engineering precision."
+  "bird": "Subject: {bird}, perched on a short bare twig, drawn like a plate in John Gould's Birds of Europe, accurate plumage."
 }
