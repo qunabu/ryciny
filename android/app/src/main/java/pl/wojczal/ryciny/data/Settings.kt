@@ -36,6 +36,8 @@ data class Settings(
     val listen: Boolean = true,
     /** Show only planes the microphone heard; the rest are still logged, just not shown. */
     val onlyHeardPlanes: Boolean = true,
+    /** Per-sound switches set by the user, over the defaults in sounds.json. */
+    val sounds: Map<String, Boolean> = emptyMap(),
 )
 
 class SettingsStore(dir: File, private val scope: CoroutineScope) {

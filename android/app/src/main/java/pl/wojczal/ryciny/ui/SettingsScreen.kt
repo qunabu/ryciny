@@ -121,6 +121,12 @@ fun SettingsScreen(g: Graph) {
         )
         Button(onClick = { scope.launch(kotlinx.coroutines.Dispatchers.IO) { g.rails.ensureToday(force = true) } }) { Text("Odśwież rozkład") }
 
+        Section("Dźwięki okolicy")
+        Text("Wyłącz to, czego w okolicy nie ma: zniknie z ryciny i z Dziennika i nie będzie więcej zapisywane.", style = Italic, color = InkSoft)
+        g.catalog.sounds.forEach { sound ->
+            Toggle(sound.now, g.catalog.isOn(sound.key, s)) { v -> g.settings.update { it.copy(sounds = it.sounds + (sound.key to v)) } }
+        }
+
         Section("Ptaki")
         Slide("Minimalna pewność BirdNET: ${(s.birdThreshold * 100).roundToInt()}%", s.birdThreshold, 0.3f..0.95f) { v -> g.settings.update { it.copy(birdThreshold = v) } }
         Toggle("Tylko gatunki występujące tu o tej porze roku", s.rangeFilter) { v -> g.settings.update { it.copy(rangeFilter = v) } }

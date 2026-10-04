@@ -59,6 +59,7 @@ class Analyzer(
         state.value = state.value.copy(level = Dsp.rms(window), sound = yamnet.classes[top.first], at = at)
         if (aircraft >= AIRCRAFT_THRESHOLD) sky.heard(at)
         sounds.forEach { sound ->
+            if (!(s.sounds[sound.key] ?: sound.enabled)) return@forEach
             val score = frames.maxOf { f -> sound.classes.maxOf { f.scores[it] } }
             if (score < sound.threshold) return@forEach
             val recent = hits.getOrPut(sound.key) { ArrayDeque() }.apply {

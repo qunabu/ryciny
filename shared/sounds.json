@@ -1,5 +1,5 @@
 {
- "about": "Sounds YAMNet hears that get their own engraving. classes are YAMNet (AudioSet) indices from yamnet_class_map.csv; an event fires when any of them scores at least threshold in a 3 s window. For talking and children only the fact is kept: no audio is stored and no words are recognised. minHits: how many 3 s windows within a minute must hear it before it counts (default 1), for sounds that a single noisy window fakes easily.",
+ "about": "Sounds YAMNet hears that get their own engraving. classes are YAMNet (AudioSet) indices from yamnet_class_map.csv; an event fires when any of them scores at least threshold in a 3 s window. For talking and children only the fact is kept: no audio is stored and no words are recognised. minHits: how many 3 s windows within a minute must hear it before it counts (default 1), for sounds that a single noisy window fakes easily. enabled: false switches a sound off by default (it can be switched back on in the app's settings).",
  "sounds": [
   {
    "key": "mower",
@@ -250,7 +250,8 @@
     91
    ],
    "threshold": 0.35,
-   "prompt": "Subject: a sheep standing in profile, drawn like a plate in a Victorian book of livestock."
+   "prompt": "Subject: a sheep standing in profile, drawn like a plate in a Victorian book of livestock.",
+   "enabled": false
   },
   {
    "key": "goat",
@@ -260,7 +261,8 @@
     90
    ],
    "threshold": 0.35,
-   "prompt": "Subject: a goat standing in profile, drawn like a plate in a Victorian book of livestock."
+   "prompt": "Subject: a goat standing in profile, drawn like a plate in a Victorian book of livestock.",
+   "enabled": false
   },
   {
    "key": "pig",

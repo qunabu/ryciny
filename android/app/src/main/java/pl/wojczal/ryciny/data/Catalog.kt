@@ -18,6 +18,8 @@ data class Sound(
     val prompt: String,
     /** How many windows within a minute must hear it before it counts; guards against one noisy window. */
     val minHits: Int = 1,
+    /** Off by default, e.g. sheep in a town where children's voices fake their bleating. */
+    val enabled: Boolean = true,
 )
 
 @Serializable
@@ -37,6 +39,12 @@ class Catalog(context: Context) {
     private val soundsByKey = sounds.associateBy { it.key }
 
     fun sound(key: String): Sound? = soundsByKey[key]
+
+    /** A sound as the settings have it: the user's switch, else its default from sounds.json. */
+    fun isOn(key: String, settings: Settings): Boolean = settings.sounds[key] ?: soundsByKey[key]?.enabled ?: false
+
+    /** Only the sounds currently switched on; switched-off ones vanish from the plate and the journal too. */
+    fun soundOn(key: String, settings: Settings): Sound? = sound(key)?.takeIf { isOn(key, settings) }
 
     /** The engraving for one heard sound; a train gets its operator's livery. */
     fun soundArt(sound: Sound, variant: String): pl.wojczal.ryciny.art.ArtRequest =

@@ -3,6 +3,11 @@
 Numeracja: `MAJOR.MINOR.PATCH` (semver). Wersja jest w `android/gradle.properties` (`ryciny.version`),
 tag w gicie to `vX.Y.Z`, a każdy tag ma release z plikiem APK.
 
+## 0.7.2 - 2026-10-04
+
+- Owca i koza są domyślnie wyłączone: w mieście ich „beczenie” to były głosy dzieci, a te łapie osobna kategoria.
+- Ustawienia → „Dźwięki okolicy”: przełącznik dla każdego z 34 dźwięków. Wyłączony dźwięk nie jest zapisywany i znika z ryciny oraz z Dziennika (również wcześniejsze wpisy). Domyślne ustawienie to nowe pole `enabled` w `shared/sounds.json`.
+
 ## 0.7.1 - 2026-10-04
 
 - Mniej fałszywych dźwięków: gdy telefon sam coś odtwarza (film, wiadomość głosowa, dźwięk powiadomienia), analiza jest wstrzymana, bo mikrofon słyszał telefon i zapisywał „muzykę”, „rozmowy” czy „syreny”.

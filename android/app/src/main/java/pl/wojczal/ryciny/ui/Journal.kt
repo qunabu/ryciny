@@ -64,7 +64,7 @@ fun JournalScreen(g: Graph) {
         if (filter in setOf("all", "birds")) journal.birds.forEach { add(BirdEntry(it.name, it.sci, it.conf, it.count, it.lastAt)) }
         if (filter in setOf("all", "dogs")) journal.barks.forEach { add(BarkEntry(it, it.dogId?.let { id -> dogs[id]?.let { d -> "${d.name} (${d.breed})" } }, it.lastAt)) }
         if (filter in setOf("all", "sounds")) journal.sounds.forEach { e ->
-            g.catalog.sound(e.key)?.let { add(SoundEntry(it, e, e.at, e.lastAt)) }
+            g.catalog.soundOn(e.key, g.settings.value)?.let { add(SoundEntry(it, e, e.at, e.lastAt)) }
         }
         val onlyHeard = g.settings.value.onlyHeardPlanes
         if (filter in setOf("all", "planes")) journal.planes.filter { it.heard || !onlyHeard }.forEach {
