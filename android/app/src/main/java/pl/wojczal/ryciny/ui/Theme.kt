@@ -3,7 +3,10 @@ package pl.wojczal.ryciny.ui
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -142,6 +145,41 @@ fun Engraving(request: ArtRequest, height: Dp, modifier: Modifier = Modifier, pl
     } else {
         Box(modifier.height(height), contentAlignment = Alignment.Center) {
             Caption(placeholder, size = 14, color = InkSoft)
+        }
+    }
+}
+
+private val thumbs = android.util.LruCache<String, ImageBitmap>(120)
+
+private fun decodeThumb(path: String, px: Int): ImageBitmap? {
+    val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+    BitmapFactory.decodeFile(path, bounds)
+    var sample = 1
+    while (maxOf(bounds.outWidth, bounds.outHeight) / (sample * 2) >= px * 2) sample *= 2
+    return BitmapFactory.decodeFile(path, BitmapFactory.Options().apply { inSampleSize = sample })?.asImageBitmap()
+}
+
+/**
+ * A small engraving for a journal row. Shows only what is already on the phone, so scrolling the
+ * journal never orders a paid picture; [fetch] lets free ones (fugleramme's bird plates) download.
+ */
+@Composable
+fun Thumb(request: ArtRequest, fetch: Boolean, modifier: Modifier = Modifier, size: Dp = 56.dp) {
+    val art = LocalContext.current.graph.art
+    val version by art.version.collectAsState()
+    val px = with(androidx.compose.ui.platform.LocalDensity.current) { size.roundToPx() }
+    val image by produceState<ImageBitmap?>(null, request, version) {
+        val file = art.cached(request) ?: if (fetch) art.load(request) else null
+        value = file?.let { f ->
+            thumbs.get(f.path) ?: withContext(Dispatchers.IO) { decodeThumb(f.path, px) }?.also { thumbs.put(f.path, it) }
+        }
+    }
+    Box(modifier.size(size), contentAlignment = Alignment.Center) {
+        val bmp = image
+        if (bmp != null) {
+            Image(bmp, contentDescription = request.subject, contentScale = ContentScale.Fit, modifier = Modifier.fillMaxSize())
+        } else {
+            Box(Modifier.size(size * 0.6f).border(0.8.dp, InkSoft.copy(alpha = 0.3f)))
         }
     }
 }

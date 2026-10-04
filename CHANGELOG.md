@@ -3,6 +3,10 @@
 Numeracja: `MAJOR.MINOR.PATCH` (semver). Wersja jest w `android/gradle.properties` (`ryciny.version`),
 tag w gicie to `vX.Y.Z`, a każdy tag ma release z plikiem APK.
 
+## 0.4.0 - 2026-10-04
+
+- Dziennik: miniatura ryciny przy każdym wpisie (ptak, samolot, pies, dźwięk). Miniatury pokazują tylko ryciny zapisane w telefonie, więc przewijanie niczego nie generuje; płatną rycinę samolotu zamawia się dotknięciem wpisu. Darmowe tablice ptaków dociągają się same.
+
 ## 0.3.1 - 2026-10-04
 
 - Dolne menu ma trzy zakładki: lista znanych psów przeszła do Dziennika (filtr „psy”), nad szczekania.

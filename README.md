@@ -37,7 +37,7 @@ i dźwięków wygenerował `gpt-image-1`, a ptaka narysował John Gould w XIX wi
 | Dziennik | Rycina samolotu z Dziennika | Psy w Dzienniku | Ustawienia |
 | :---: | :---: | :---: | :---: |
 | ![Dziennik](docs/screenshots/dziennik.png) | ![Embraer E175 LOT](docs/screenshots/samolot-z-dziennika.png) | ![Psy](docs/screenshots/dziennik-psy.png) | ![Ustawienia](docs/screenshots/ustawienia.png) |
-| Samoloty z trasami (Finnair GDN → HEL, Wizz Air GDN → TGD), koszenie, dzwony | „Rycina” przy samolocie: Embraer E175 LOT Gdańsk → Warszawa | Filtr „psy”: znane psy, szczekania do odsłuchania i oznaczenia („Kto to?”) | Klucz do rycin, licznik rycin w pamięci, miejsce |
+| Każdy wpis z miniaturą ryciny: sroka, wrona siwa, samoloty z trasami (Finnair GDN → HEL, Wizz Air GDN → TGD) | „Rycina” przy samolocie: Embraer E175 LOT Gdańsk → Warszawa | Filtr „psy”: znane psy, szczekania do odsłuchania i oznaczenia („Kto to?”) | Klucz do rycin, licznik rycin w pamięci, miejsce |
 
 ### Galeria rycin
 
