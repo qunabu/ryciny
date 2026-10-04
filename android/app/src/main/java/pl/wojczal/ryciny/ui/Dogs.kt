@@ -26,24 +26,21 @@ import pl.wojczal.ryciny.art.ArtRequest
 import pl.wojczal.ryciny.art.Kind
 import pl.wojczal.ryciny.data.Dog
 
-/** The neighbourhood's dogs as the app knows them. */
+/** The neighbourhood's named dogs, shown above the barks when the journal is filtered to dogs. */
 @Composable
-fun DogsScreen(g: Graph) {
+fun KnownDogs(g: Graph) {
     val journal by g.store.flow.collectAsState()
     var editing by remember { mutableStateOf<Dog?>(null) }
-    Column(Modifier.fillMaxSize().paper().padding(horizontal = 20.dp, vertical = 16.dp)) {
-        Caption("Psy z sąsiedztwa", size = 24, italic = false, modifier = Modifier.fillMaxWidth())
-        Caption(
-            "Szczekanie wykrywa YAMNet. Rasy nie da się odczytać z samego dźwięku, więc każdego psa oznaczasz raz " +
-                "w Dzienniku („Kto to?”). Od tej pory jego szczekanie jest porównywane z zapamiętanymi próbkami " +
-                "— im więcej oznaczeń, tym pewniej. Nieoznaczone psy dostają tylko szacunek wielkości z wysokości głosu.",
-            size = 14, color = InkSoft,
-        )
+    Column(Modifier.fillMaxWidth().padding(top = 8.dp)) {
         if (journal.dogs.isEmpty()) {
-            Caption("Jeszcze żadnego. Poczekaj, aż któryś zaszczeka, i oznacz go w Dzienniku.", color = InkSoft, modifier = Modifier.padding(top = 24.dp))
+            Caption(
+                "Rasy nie da się odczytać z samego szczekania. Przy szczekaniu poniżej naciśnij „Kto to?” i podaj " +
+                    "imię i rasę psa: od tej pory aplikacja rozpozna go sama.",
+                size = 14, color = InkSoft,
+            )
         }
-        LazyColumn {
-            items(journal.dogs) { dog ->
+        Column {
+            journal.dogs.forEach { dog ->
                 val barks = journal.barks.filter { it.dogId == dog.id }
                 Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Engraving(ArtRequest(Kind.DOG, dog.breed, dog.breedEn), height = 80.dp, placeholder = "…")
@@ -56,6 +53,7 @@ fun DogsScreen(g: Graph) {
                 HorizontalDivider(color = InkSoft.copy(alpha = 0.2f))
             }
         }
+        if (journal.dogs.isNotEmpty()) Caption("Szczekania", size = 16, italic = false, color = Rubric, modifier = Modifier.padding(top = 10.dp))
     }
     editing?.let { dog ->
         var name by remember(dog.id) { mutableStateOf(dog.name) }

@@ -3,6 +3,11 @@
 Numeracja: `MAJOR.MINOR.PATCH` (semver). Wersja jest w `android/gradle.properties` (`ryciny.version`),
 tag w gicie to `vX.Y.Z`, a każdy tag ma release z plikiem APK.
 
+## 0.3.1 - 2026-10-04
+
+- Dolne menu ma trzy zakładki: lista znanych psów przeszła do Dziennika (filtr „psy”), nad szczekania.
+- Kosiarka łapie się z większej odległości: próg z 0,3 na 0,15 (piła łańcuchowa z 0,35 na 0,25). Kosiarka sąsiada przy progu 0,3 nie została zapisana.
+
 ## 0.3.0 - 2026-10-04
 
 - 31 dźwięków okolicy, każdy z własną ryciną: kosiarka, piła łańcuchowa, majsterkowanie, burza, deszcz, wiatr, statek i syrena mgłowa, dzwony kościelne, pociąg, motocykl, helikopter, karetka, policja, straż pożarna, syrena alarmowa, fajerwerki, alarm samochodowy, kot, kogut, koń, krowa, owca, koza, świnia, żaby, świerszcze, pszczoły i osy, komar, muzyka u sąsiadów, dzwonek do drzwi, lodziarz.

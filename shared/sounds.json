@@ -8,7 +8,7 @@
    "classes": [
     340
    ],
-   "threshold": 0.3,
+   "threshold": 0.15,
    "prompt": "Subject: a gardener in shirtsleeves pushing a modern petrol lawn mower across a narrow strip of freshly cut lawn, a few blades of grass flying, drawn like a plate in a Victorian treatise on gardening implements, the mower drawn with engineering precision."
   },
   {
@@ -18,7 +18,7 @@
    "classes": [
     341
    ],
-   "threshold": 0.35,
+   "threshold": 0.25,
    "prompt": "Subject: a woodsman cutting a log with a modern chainsaw, wood chips flying, drawn like a plate in a Victorian treatise on forestry tools."
   },
   {

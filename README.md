@@ -21,18 +21,36 @@ Etap 1 to aplikacja na Androida do testów. Etap 2 to Raspberry Pi z kolorowym e
 
 ## Jak to wygląda
 
-| Ptak | Samolot | Pies |
-| :---: | :---: | :---: |
-| ![Kos z tablicy Goulda](docs/screenshots/ptak.png) | ![Samolot nad domem](docs/screenshots/samolot.png) | ![Nieznany pies](docs/screenshots/pies.png) |
-| Kos rozpoznany po śpiewie, tablica z fugleramme | Embraer Praetor 600 nad Gdańskiem: linia, rejestracja, wysokość, kierunek | Szczekający pies, wielkość zgadnięta z wysokości głosu |
+Wszystko poniżej to zrzuty z Pixela 9 w Gdańsku, zrobione 4 października 2026. Ryciny samolotów, psa
+i dźwięków wygenerował `gpt-image-1`, a ptaka narysował John Gould w XIX wieku.
 
-| Dziennik | Psy | Ustawienia |
+| Ptak | Samolot nad domem | Pies |
 | :---: | :---: | :---: |
-| ![Dziennik](docs/screenshots/dziennik.png) | ![Psy z sąsiedztwa](docs/screenshots/psy.png) | ![Ustawienia](docs/screenshots/ustawienia.png) |
-| Wszystko, co przeleciało, zaśpiewało i zaszczekało. Szczekanie można odsłuchać i oznaczyć („Kto to?”) | Psy oznaczone przez ciebie, z liczbą próbek | Klucz do generowania rycin, miejsce, progi |
+| ![Kos z tablicy Goulda](docs/screenshots/ptak.png) | ![Cessna 208 Caravan podchodząca do lądowania](docs/screenshots/samolot.png) | ![Nieznany pies](docs/screenshots/pies.png) |
+| Kos rozpoznany po śpiewie, tablica z fugleramme | Cessna 208 Caravan 2,2 km od domu, 30 m nad ziemią, zniża lot do GDN | Szczekający pies, wielkość zgadnięta z wysokości głosu |
 
-Zrzuty pochodzą z pierwszego uruchomienia na Pixelu 9, jeszcze bez klucza do generowania obrazów, dlatego
-samolot i pies mają napis „rycina w przygotowaniu…” zamiast ryciny. Ptaki mają gotowe tablice i nie potrzebują klucza.
+| Sąsiad kosi trawę | Dzwony | Muzyka u sąsiadów |
+| :---: | :---: | :---: |
+| ![Kosiarka](docs/screenshots/kosiarka.png) | ![Dzwon](docs/screenshots/dzwony.png) | ![Gramofon](docs/screenshots/muzyka.png) |
+| Koszenie trawy jako tablica z XIX-wiecznego poradnika ogrodniczego | Dzwony kościelne | Muzyka zza płotu |
+
+| Dziennik | Rycina samolotu z Dziennika | Psy w Dzienniku | Ustawienia |
+| :---: | :---: | :---: | :---: |
+| ![Dziennik](docs/screenshots/dziennik.png) | ![Embraer E175 LOT](docs/screenshots/samolot-z-dziennika.png) | ![Psy](docs/screenshots/dziennik-psy.png) | ![Ustawienia](docs/screenshots/ustawienia.png) |
+| Samoloty z trasami (Finnair GDN → HEL, Wizz Air GDN → TGD), koszenie, dzwony | „Rycina” przy samolocie: Embraer E175 LOT Gdańsk → Warszawa | Filtr „psy”: znane psy, szczekania do odsłuchania i oznaczenia („Kto to?”) | Klucz do rycin, licznik rycin w pamięci, miejsce |
+
+### Galeria rycin
+
+Same ryciny, tak jak zapisuje je aplikacja: wygenerowane raz, wycięte z tła i trzymane w telefonie.
+
+| | | |
+| :---: | :---: | :---: |
+| ![Embraer E175 w barwach LOT](docs/ryciny/embraer-e175-lot.png) | ![Cessna 208 Caravan](docs/ryciny/cessna-208.png) | ![Kos, John Gould](docs/ryciny/kos.png) |
+| Embraer E175, LOT | Cessna 208 Caravan | Kos (Gould, *Birds of Europe*) |
+| ![Kundel średni](docs/ryciny/pies.png) | ![Sąsiad z kosiarką](docs/ryciny/kosiarka.png) | ![Dzwon kościelny](docs/ryciny/dzwon.png) |
+| Kundel średniej wielkości | Sąsiad kosi trawę | Dzwony kościelne |
+| ![Gramofon](docs/ryciny/gramofon.png) | | |
+| Muzyka u sąsiadów | | |
 
 ## Instalacja na telefonie
 
@@ -113,7 +131,7 @@ android/app/src/main/java/pl/wojczal/ryciny/
   planes/               adsb.lol + adsbdb
   art/                  tablice fugleramme, generowanie (OpenAI/Gemini), wycinanie z tła
   data/                 dziennik (JSON), psy, ustawienia, eksport dla Pi
-  ui/                   rycina, dziennik, psy, ustawienia
+  ui/                   rycina, dziennik (z psami), ustawienia
 ```
 
 ## Etap 2: Raspberry Pi + kolorowy e-ink

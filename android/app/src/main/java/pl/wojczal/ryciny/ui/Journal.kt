@@ -74,6 +74,7 @@ fun JournalScreen(g: Graph) {
             }
         }
         LazyColumn(Modifier.fillMaxSize()) {
+            if (filter == "dogs") item { KnownDogs(g) }
             items(entries) { e ->
                 when (e) {
                     is SoundEntry -> Line(hhmm(e.at), e.title, "${hhmm(e.from)}–${hhmm(e.at)}")
