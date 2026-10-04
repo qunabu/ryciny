@@ -1,0 +1,191 @@
+package pl.wojczal.ryciny.ui
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.produceState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
+import pl.wojczal.ryciny.Graph
+import pl.wojczal.ryciny.art.ArtRequest
+import pl.wojczal.ryciny.art.Kind
+import pl.wojczal.ryciny.audio.ListenService
+import pl.wojczal.ryciny.data.Bark
+import pl.wojczal.ryciny.data.BirdHit
+import pl.wojczal.ryciny.data.Dog
+import pl.wojczal.ryciny.planes.Plane
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+val PL: Locale = Locale.forLanguageTag("pl-PL")
+fun hhmm(t: Long): String = SimpleDateFormat("HH:mm", PL).format(Date(t))
+fun km(d: Double): String = String.format(PL, "%.1f km", d)
+
+private val COMPASS = listOf("N", "NE", "E", "SE", "S", "SW", "W", "NW")
+fun compass(deg: Double) = COMPASS[((deg + 22.5) / 45).toInt() % 8]
+
+@Composable
+fun rememberNow(): Long {
+    val now by produceState(System.currentTimeMillis()) {
+        while (true) {
+            delay(15_000)
+            value = System.currentTimeMillis()
+        }
+    }
+    return now
+}
+
+/** One thing to draw: the newest of the plane overhead, the last bird and the last dog. */
+private sealed interface Subject { val at: Long }
+private data class PlaneSubject(val plane: Plane, override val at: Long) : Subject
+private data class BirdSubject(val bird: BirdHit, val count: Int, override val at: Long) : Subject
+private data class DogSubject(val dog: Dog?, val barks: List<Bark>, override val at: Long) : Subject
+
+/** The page itself: one engraving, of whatever was seen or heard most recently. Tap for the next. */
+@Composable
+fun PlateScreen(g: Graph) {
+    val journal by g.store.flow.collectAsState()
+    val sky by g.sky.flow.collectAsState()
+    val settings by g.settings.flow.collectAsState()
+    val live by g.live.collectAsState()
+    val now = rememberNow()
+    val since = now - settings.lookbackHours * 3600_000L
+
+    val subjects = buildList {
+        sky.overhead?.let { p ->
+            // A plane counts from when it came overhead, so one that lingers does not hold the page forever.
+            val pass = journal.planes.lastOrNull { it.hex == p.hex }
+            add(PlaneSubject(p, pass?.at ?: sky.updatedAt))
+        }
+        journal.birds.filter { it.lastAt >= since }.maxByOrNull { it.lastAt }?.let { b ->
+            add(BirdSubject(b, journal.birds.filter { it.sci == b.sci && it.lastAt >= since }.sumOf { it.count }, b.lastAt))
+        }
+        journal.barks.filter { it.lastAt >= since }.maxByOrNull { it.lastAt }?.let { last ->
+            val same = journal.barks.filter { it.lastAt >= since && it.dogId == last.dogId && (last.dogId != null || it.size == last.size) }
+            add(DogSubject(journal.dogs.firstOrNull { it.id == last.dogId }, same, last.lastAt))
+        }
+    }.sortedByDescending { it.at }
+
+    var offset by remember { mutableIntStateOf(0) }
+    val newest = subjects.firstOrNull()
+    // Something new arrived: go back to it.
+    LaunchedEffect(newest?.javaClass, newest?.at) { offset = 0 }
+    val subject = subjects.getOrNull(if (subjects.isEmpty()) 0 else offset % subjects.size)
+
+    Column(
+        Modifier.fillMaxSize().paper().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 22.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Caption(SimpleDateFormat("d MMMM yyyy, HH:mm", PL).format(Date(now)), size = 14, color = InkSoft)
+        Spacer(Modifier.height(12.dp))
+        Column(
+            Modifier.fillMaxWidth().clickable(enabled = subjects.size > 1) { offset++ },
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            when (subject) {
+                is PlaneSubject -> PlanePlate(subject.plane, now - sky.heardAt < 20_000)
+                is BirdSubject -> BirdPlate(subject.bird, subject.count)
+                is DogSubject -> DogPlate(g, subject.dog, subject.barks)
+                null -> Caption(
+                    if (sky.error != null) "Brak danych ADS-B (${sky.error})" else "Cisza: nic nie przeleciało, nie zaśpiewało ani nie zaszczekało",
+                    color = InkSoft, modifier = Modifier.padding(vertical = 80.dp),
+                )
+            }
+            if (subjects.size > 1) {
+                Spacer(Modifier.height(10.dp))
+                Caption("${offset % subjects.size + 1} z ${subjects.size} · dotknij, by zobaczyć następną", size = 12, color = InkSoft)
+            }
+        }
+
+        Spacer(Modifier.height(18.dp))
+        LiveStrip(live.listening, live.sound, live.error)
+        Spacer(Modifier.height(8.dp))
+        Caption(
+            "Ryciny ptaków: fugleramme (CC BY-SA 4.0), tablice z domeny publicznej · rozpoznawanie: BirdNET, YAMNet · " +
+                "samoloty: adsb.lol, adsbdb · ryciny samolotów i psów generowane",
+            size = 11, color = InkSoft,
+        )
+    }
+}
+
+@Composable
+private fun PlanePlate(p: Plane, heard: Boolean) {
+    Engraving(
+        ArtRequest(Kind.PLANE, "${p.typeCode}-${p.airlineIcao.ifBlank { "plain" }}", p.title, p.airline),
+        height = 260.dp,
+        modifier = Modifier.fillMaxWidth(),
+    )
+    Caption(p.title, size = 28)
+    Caption(listOf(p.airline, p.callsign, p.registration).filter { it.isNotBlank() }.joinToString(" · "), size = 17)
+    if (p.route.isNotBlank()) Caption(p.route, size = 19, italic = false)
+    val alt = p.altM?.let { "wys. ${String.format(PL, "%,d", it)} m" }
+    val climb = p.climbMs?.let { if (it > 1.5) "wznosi się" else if (it < -1.5) "zniża lot" else null }
+    Caption(
+        listOfNotNull(km(p.distKm) + " na " + compass(p.bearing), alt, p.speedKmh?.let { "$it km/h" }, climb).joinToString(" · "),
+        size = 15, color = InkSoft,
+    )
+    if (heard) Caption("— słychać go teraz —", size = 15, color = Rubric)
+}
+
+@Composable
+private fun BirdPlate(bird: BirdHit, count: Int) {
+    Engraving(ArtRequest(Kind.BIRD, bird.sci, bird.sci), height = 280.dp, modifier = Modifier.fillMaxWidth())
+    Caption(bird.name.replaceFirstChar { it.uppercase() }, size = 28, italic = false)
+    Caption(bird.sci, size = 19)
+    Caption("ostatnio ${hhmm(bird.lastAt)}" + if (count > 1) " · ${count}×" else "", size = 14, color = InkSoft)
+}
+
+@Composable
+private fun DogPlate(g: Graph, dog: Dog?, barks: List<Bark>) {
+    val count = barks.sumOf { it.count }
+    val last = barks.maxOf { it.lastAt }
+    if (dog != null) {
+        Engraving(ArtRequest(Kind.DOG, dog.breed, dog.breedEn), height = 260.dp, modifier = Modifier.fillMaxWidth())
+        Caption(dog.name, size = 28, italic = false)
+        Caption(dog.breed, size = 19)
+        Caption("szczekał ${count}× · ostatnio ${hhmm(last)}", size = 14, color = InkSoft)
+    } else {
+        val size = barks.first().size
+        val mongrel = g.catalog.mongrel(size)
+        Engraving(ArtRequest(Kind.DOG, mongrel.pl, mongrel.en), height = 240.dp, modifier = Modifier.fillMaxWidth())
+        Caption(if (size == "?") "Nieznany pies" else "Nieznany pies, raczej $size", size = 26, italic = false)
+        Caption("szczekał ${count}× · ostatnio ${hhmm(last)} · oznacz go w Dzienniku", size = 14, color = InkSoft)
+    }
+}
+
+@Composable
+private fun LiveStrip(listening: Boolean, sound: String, error: String?) {
+    val context = LocalContext.current
+    Row(
+        Modifier.clickable { if (listening) ListenService.stop(context) else ListenService.start(context) }.padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Caption(
+            when {
+                error != null -> "nasłuch przerwany: $error"
+                listening -> "● nasłuch trwa" + if (sound.isNotBlank()) " · słychać: $sound" else ""
+                else -> "○ nasłuch wyłączony — dotknij, by włączyć"
+            },
+            size = 14,
+            color = if (listening) Rubric else InkSoft,
+        )
+    }
+}

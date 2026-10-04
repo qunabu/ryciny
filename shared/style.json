@@ -1,0 +1,8 @@
+{
+  "about": "Prompt templates for the engravings the app generates. The Raspberry Pi version reads this same file, so both draw in one style.",
+  "base": "A plate from a 19th-century natural history book: hand-coloured copperplate engraving with fine cross-hatching and stippling, soft muted watercolour tints, printed on plain off-white paper. One single subject, centred, entirely inside the picture with generous empty margin on every side, nothing cropped. Plain pure white background with no scenery, no ground, no shadow, no border, no frame, no caption and no lettering of any kind.",
+  "plane": "Subject: {aircraft}{livery}, seen exactly from the side in level flight, wheels retracted, drawn like a plate in a Victorian treatise on engineering, accurate proportions of this aircraft type.",
+  "livery": " painted in the colours of the {airline} livery (colours and shapes only, no readable letters or logos)",
+  "dog": "Subject: {breed}, standing in full side profile, drawn like a plate in a Victorian book of dog breeds, accurate proportions and coat of this breed.",
+  "bird": "Subject: {bird}, perched on a short bare twig, drawn like a plate in John Gould's Birds of Europe, accurate plumage."
+}
