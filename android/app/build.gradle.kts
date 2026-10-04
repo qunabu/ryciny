@@ -23,13 +23,26 @@ android {
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
     }
 
+    signingConfigs {
+        // One key for local and CI builds, so every APK installs over the previous one without losing data.
+        // RYCINY_KEYSTORE points at it on CI; locally it is the machine's debug key.
+        create("ryciny") {
+            storeFile = file(System.getenv("RYCINY_KEYSTORE") ?: "${System.getProperty("user.home")}/.android/debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             // Test builds only: signed with the debug key so the APK installs straight away.
-            signingConfig = signingConfigs.getByName("debug")
+            // Without the shared key (a pull request on CI) the build still works, signed with a throwaway debug key.
+            val shared = signingConfigs.getByName("ryciny")
+            signingConfig = if (shared.storeFile?.exists() == true) shared else signingConfigs.getByName("debug")
         }
     }
 

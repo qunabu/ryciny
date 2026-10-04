@@ -57,8 +57,9 @@ jobs:
             echo "::warning::No DEBUG_KEYSTORE_BASE64 secret: this APK is signed with a throwaway key and will not install over the app"
             exit 0
           fi
-          mkdir -p ~/.android
-          echo "$DEBUG_KEYSTORE_BASE64" | base64 -d > ~/.android/debug.keystore
+          # Handed to Gradle by path: build.gradle.kts signs release builds with RYCINY_KEYSTORE.
+          echo "$DEBUG_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/ryciny.keystore"
+          echo "RYCINY_KEYSTORE=$RUNNER_TEMP/ryciny.keystore" >> "$GITHUB_ENV"
 
       - name: Build
         working-directory: android
@@ -66,6 +67,16 @@ jobs:
 
       - name: Rename
         run: cp android/app/build/outputs/apk/release/app-release.apk "ryciny-v${{ steps.version.outputs.version }}.apk"
+
+      # A release APK signed with any other key would not install over the app: check before publishing.
+      - name: Check signature
+        if: env.RYCINY_KEYSTORE != ''
+        run: |
+          apk="ryciny-v${{ steps.version.outputs.version }}.apk"
+          want=$(keytool -list -v -keystore "$RYCINY_KEYSTORE" -storepass android | sed -n 's/.*SHA256: //p' | tr -d ':' | tr 'A-F' 'a-f' | head -1)
+          got=$("$ANDROID_HOME"/build-tools/*/apksigner verify --print-certs "$apk" | sed -n 's/.*SHA-256 digest: //p' | head -1)
+          echo "keystore $want"; echo "apk      $got"
+          [[ -n "$want" && "$want" == "$got" ]]
 
       - uses: actions/upload-artifact@v4
         with:
