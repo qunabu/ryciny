@@ -196,6 +196,16 @@ class Store(private val dir: File, scope: CoroutineScope) {
         j.copy(sounds = sounds.filter { at - it.lastAt < KEEP_MS }.takeLast(MAX_SOUNDS))
     }
 
+    /** Gives events heard before the timetable was ready their details after all, e.g. a train's route. */
+    fun fillSounds(key: String, details: (SoundEvent) -> Triple<String, String, String>?) = state.update { j ->
+        j.copy(
+            sounds = j.sounds.map { e ->
+                if (e.key != key || e.title.isNotBlank()) e
+                else details(e)?.let { (title, subtitle, variant) -> e.copy(title = title, subtitle = subtitle, variant = variant) } ?: e
+            },
+        )
+    }
+
     fun addPlane(pass: PlanePass) = state.update { j ->
         val last = j.planes.lastOrNull { it.hex == pass.hex }
         val planes = if (last != null && pass.at - last.lastAt < PLANE_GAP_MS) {

@@ -55,7 +55,7 @@ class Analyzer(
             if (train == null) {
                 store.addSound(sound.key, at, score)
             } else {
-                store.addSound(sound.key, at, score, train.title, "${train.route} · planowo ${hhmm(train.passSec)}", train.agency)
+                store.addSound(sound.key, at, score, train.title, "${train.route} · planowo ${train.hhmm}", train.agency)
             }
         }
         if (dogScores.max() >= s.barkThreshold) bark(audio16, frames, dogScores, at, s.barkThreshold, s.dogMatch)
@@ -108,8 +108,6 @@ class Analyzer(
             ),
         )
     }
-
-    private fun hhmm(sec: Int) = "%02d:%02d".format(sec / 3600, sec % 3600 / 60)
 
     companion object {
         const val AIRCRAFT_THRESHOLD = 0.25f

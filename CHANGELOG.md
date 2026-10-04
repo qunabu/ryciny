@@ -3,6 +3,12 @@
 Numeracja: `MAJOR.MINOR.PATCH` (semver). Wersja jest w `android/gradle.properties` (`ryciny.version`),
 tag w gicie to `vX.Y.Z`, a każdy tag ma release z plikiem APK.
 
+## 0.5.1 - 2026-10-04
+
+- Pociągi usłyszane, zanim rozkład się wczytał, dostają trasę wstecz, gdy tylko rozkład jest gotowy (wcześniej zostawały jako sam „Przejechał pociąg”).
+- Rozkład przelicza się od razu, gdy zmieni się lokalizacja; wcześniej po starcie przez pół godziny mógł być liczony dla centrum Gdańska.
+- Gdy pociąg nie ma trasy, rycina mówi dlaczego (rozkład się wczytuje, brak rozkładu, brak pociągu ±5 min).
+
 ## 0.5.0 - 2026-10-04
 
 - Pociągi: gdy mikrofon usłyszy pociąg, aplikacja dopasowuje go do rozkładu wszystkich polskich pociągów (SKM Trójmiasto, PolRegio, Intercity…; GTFS z mkuran.pl na danych PKP PLK) i pokazuje przewoźnika, numer, skąd i dokąd jedzie oraz planową godzinę. Rozkład (30 MB) pobiera się przez Wi-Fi raz na 3 dni; opóźnienia nie są uwzględniane.

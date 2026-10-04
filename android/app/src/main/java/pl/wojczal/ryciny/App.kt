@@ -62,6 +62,19 @@ class Graph(val context: Context) {
         }
     }
 
+    init {
+        // A train heard while the timetable was still loading gets its route once the timetable is in.
+        scope.launch {
+            rails.flow.map { it.date to it.passes.size }.distinctUntilChanged().collect {
+                val today = java.time.LocalDate.now(java.time.ZoneId.of("Europe/Warsaw"))
+                store.fillSounds("train") { e ->
+                    val day = java.time.Instant.ofEpochMilli(e.at).atZone(java.time.ZoneId.of("Europe/Warsaw")).toLocalDate()
+                    if (day != today) null else rails.match(e.at)?.let { t -> Triple(t.title, "${t.route} · planowo ${t.hhmm}", t.agency) }
+                }
+            }
+        }
+    }
+
     /** Loads ~80 MB of models: touch it off the main thread only. */
     val analyzer by lazy { Analyzer(context, settings, place, store, sky, live, catalog.sounds, rails) }
 }

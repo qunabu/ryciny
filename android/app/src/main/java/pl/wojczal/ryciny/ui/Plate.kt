@@ -207,6 +207,18 @@ private fun SoundPlate(sound: Sound, e: SoundEvent, now: Long) {
     Caption(if (still) sound.now else sound.past, size = 28, italic = false)
     if (e.title.isNotBlank()) Caption(e.title, size = 20)
     if (e.subtitle.isNotBlank()) Caption(e.subtitle, size = 17, italic = false)
+    if (sound.key == "train" && e.title.isBlank()) {
+        val rails by LocalContext.current.graph.rails.flow.collectAsState()
+        Caption(
+            when {
+                rails.busy -> "rozkład jeszcze się wczytuje, trasa pojawi się za chwilę"
+                rails.error != null -> "brak rozkładu: ${rails.error}"
+                rails.passes.isEmpty() -> "rozkład niegotowy albo brak torów w promieniu 1,5 km"
+                else -> "żaden pociąg z rozkładu nie mijał domu ±5 min od tej chwili (może opóźniony)"
+            },
+            size = 14, color = InkSoft,
+        )
+    }
     val minutes = ((e.lastAt - e.at) / 60_000L).coerceAtLeast(1)
     Caption(if (still) "od ${hhmm(e.at)} · już $minutes min" else "${hhmm(e.at)}–${hhmm(e.lastAt)} · $minutes min", size = 15, color = InkSoft)
 }

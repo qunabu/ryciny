@@ -6,6 +6,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -42,6 +44,7 @@ data class TrainPass(
 ) {
     val title: String get() = listOf(agency, number, name).filter { it.isNotBlank() }.joinToString(" ")
     val route: String get() = "$from → $to"
+    val hhmm: String get() = "%02d:%02d".format(passSec / 3600, passSec % 3600 / 60)
 }
 
 data class RailsState(
@@ -67,10 +70,15 @@ class Rails(private val context: Context, private val settings: SettingsStore, p
     val flow: StateFlow<RailsState> = state
 
     init {
+        // Right after start the place is the Gdańsk fallback until GPS answers: recount as soon as it moves.
+        scope.launch(Dispatchers.IO) {
+            place.flow.map { "${Math.round(it.lat * 100)}-${Math.round(it.lon * 100)}" }.distinctUntilChanged()
+                .collect { runCatching { ensureToday() } }
+        }
         scope.launch(Dispatchers.IO) {
             while (true) {
-                runCatching { ensureToday() }
                 delay(30 * 60_000L)
+                runCatching { ensureToday() } // a new day
             }
         }
     }
