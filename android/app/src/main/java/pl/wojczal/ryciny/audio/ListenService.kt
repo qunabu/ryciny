@@ -37,6 +37,7 @@ class ListenService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_STOP) {
+            graph.settings.update { it.copy(listen = false) }
             stopSelf()
             return START_NOT_STICKY
         }
@@ -134,7 +135,10 @@ class ListenService : Service() {
         private const val ACTION_STOP = "stop"
         const val RATE = 48_000
 
-        fun start(context: Context) = context.startForegroundService(Intent(context, ListenService::class.java))
+        fun start(context: Context) {
+            context.graph.settings.update { it.copy(listen = true) }
+            context.startForegroundService(Intent(context, ListenService::class.java))
+        }
         fun stop(context: Context) = context.startService(Intent(context, ListenService::class.java).setAction(ACTION_STOP))
     }
 }

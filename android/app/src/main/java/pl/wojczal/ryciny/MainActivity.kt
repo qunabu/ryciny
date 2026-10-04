@@ -38,7 +38,7 @@ import pl.wojczal.ryciny.ui.SettingsScreen
 class MainActivity : ComponentActivity() {
     private val permissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { granted ->
         lifecycleScope.launch { graph.place.refresh() }
-        if (granted[Manifest.permission.RECORD_AUDIO] == true) ListenService.start(this)
+        if (granted[Manifest.permission.RECORD_AUDIO] == true && graph.settings.value.listen) ListenService.start(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

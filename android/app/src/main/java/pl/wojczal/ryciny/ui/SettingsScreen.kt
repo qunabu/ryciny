@@ -48,6 +48,12 @@ fun SettingsScreen(g: Graph) {
     ) {
         Caption("Ustawienia", size = 24, italic = false, modifier = Modifier.fillMaxWidth())
 
+        val live by g.live.collectAsState()
+        Section("Nasłuch")
+        Toggle(if (live.listening) "Mikrofon włączony" else "Mikrofon wyłączony", live.listening) { on ->
+            if (on) pl.wojczal.ryciny.audio.ListenService.start(context) else pl.wojczal.ryciny.audio.ListenService.stop(context)
+        }
+
         Section("Generowanie rycin (samoloty, psy)")
         Text(
             "Claude i ElevenLabs nie generują obrazów — potrzebny jest klucz OpenAI albo Google Gemini. " +

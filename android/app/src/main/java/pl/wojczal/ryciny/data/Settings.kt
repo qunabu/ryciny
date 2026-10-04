@@ -32,6 +32,8 @@ data class Settings(
     val lon: Double = HOME_LON,
     val keepScreenOn: Boolean = true,
     val trains: Boolean = true,
+    /** Whether the microphone should be on; remembered, so a stop survives reopening the app. */
+    val listen: Boolean = true,
 )
 
 class SettingsStore(dir: File, private val scope: CoroutineScope) {

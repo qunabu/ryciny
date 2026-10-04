@@ -3,6 +3,11 @@
 Numeracja: `MAJOR.MINOR.PATCH` (semver). Wersja jest w `android/gradle.properties` (`ryciny.version`),
 tag w gicie to `vX.Y.Z`, a każdy tag ma release z plikiem APK.
 
+## 0.5.2 - 2026-10-04
+
+- Przycisk „Zatrzymaj nasłuch” / „Włącz nasłuch” pod ryciną i przełącznik „Nasłuch” na górze Ustawień (wcześniej tylko z powiadomienia albo przez stuknięcie w mały napis).
+- Wyłączony nasłuch zostaje wyłączony po ponownym otwarciu aplikacji.
+
 ## 0.5.1 - 2026-10-04
 
 - Pociągi usłyszane, zanim rozkład się wczytał, dostają trasę wstecz, gdy tylko rozkład jest gotowy (wcześniej zostawały jako sam „Przejechał pociąg”).

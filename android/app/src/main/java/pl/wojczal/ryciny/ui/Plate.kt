@@ -10,6 +10,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
@@ -184,19 +187,22 @@ private fun DogPlate(g: Graph, dog: Dog?, barks: List<Bark>) {
 @Composable
 private fun LiveStrip(listening: Boolean, sound: String, error: String?) {
     val context = LocalContext.current
-    Row(
-        Modifier.clickable { if (listening) ListenService.stop(context) else ListenService.start(context) }.padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Caption(
             when {
                 error != null -> "nasłuch przerwany: $error"
                 listening -> "● nasłuch trwa" + if (sound.isNotBlank()) " · słychać: $sound" else ""
-                else -> "○ nasłuch wyłączony — dotknij, by włączyć"
+                else -> "○ nasłuch wyłączony"
             },
             size = 14,
             color = if (listening) Rubric else InkSoft,
         )
+        Spacer(Modifier.height(6.dp))
+        if (listening) {
+            OutlinedButton(onClick = { ListenService.stop(context) }) { Text("Zatrzymaj nasłuch") }
+        } else {
+            Button(onClick = { ListenService.start(context) }) { Text("Włącz nasłuch") }
+        }
     }
 }
 
