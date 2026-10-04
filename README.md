@@ -8,6 +8,8 @@ i rysuje na „papierze” XIX-wieczne ryciny tego, co się dzieje wokół domu:
   (dane ADS-B z adsb.lol + adsbdb),
 - **psy**, które szczekają w okolicy: wykrywanie szczekania (YAMNet), rozpoznawanie konkretnych psów
   z sąsiedztwa i ich ras,
+- **pociągi**: gdy mikrofon usłyszy pociąg, aplikacja dopasowuje go do rozkładu wszystkich polskich pociągów
+  (SKM Trójmiasto, PolRegio, Intercity…) i pokazuje przewoźnika, numer, skąd i dokąd jedzie,
 - **dźwięki okolicy** (31 rodzajów, YAMNet): kosiarka i piła u sąsiada, burza, deszcz, wiatr, statki i syrena
   mgłowa z portu, dzwony kościelne, pociąg, motocykl, helikopter, karetka, policja, straż, fajerwerki, kot,
   kogut, zwierzęta gospodarskie, żaby, świerszcze, pszczoły, muzyka, dzwonek do drzwi, lodziarz. Każdy ma własną
@@ -107,6 +109,16 @@ a dwa jamniki mogą brzmieć zupełnie inaczej. Dlatego aplikacja robi to, co da
 Rasa na rycinie to ta, którą wpiszesz przy oznaczaniu psa. Nieoznaczony pies jest rysowany jako kundel
 zgadniętej wielkości. Próg dopasowania trzeba będzie pewnie dostroić na prawdziwych psach: jeśli myli psy,
 podnieś go, a jeśli nie poznaje znanych, obniż albo oznacz więcej próbek.
+
+## Pociągi
+
+- Rozkład: [polish_trains.zip z mkuran.pl](https://mkuran.pl/gtfs/) (GTFS z otwartych danych PKP PLK), 30 MB,
+  pobierany przez Wi-Fi raz na 3 dni. Raz dziennie aplikacja wylicza z niego pociągi, których trasa przechodzi
+  w promieniu 1,5 km od domu, i moment, w którym mijają dom.
+- Gdy YAMNet usłyszy pociąg, aplikacja bierze z tej listy przejazd najbliższy w czasie (±5 min) i zapisuje
+  „PolRegio 96226 · Gdańsk Osowa → Gdańsk Wrzeszcz · planowo 13:40”.
+- Opóźnienia nie są uwzględniane: plik z danymi na żywo ma 23 MB, za dużo do pobierania co kilka minut na telefonie.
+  Pociąg spóźniony o ponad 5 minut może zostać pomylony z następnym albo zostać bez dopasowania.
 
 ## Samoloty
 

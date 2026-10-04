@@ -3,6 +3,11 @@
 Numeracja: `MAJOR.MINOR.PATCH` (semver). Wersja jest w `android/gradle.properties` (`ryciny.version`),
 tag w gicie to `vX.Y.Z`, a każdy tag ma release z plikiem APK.
 
+## 0.5.0 - 2026-10-04
+
+- Pociągi: gdy mikrofon usłyszy pociąg, aplikacja dopasowuje go do rozkładu wszystkich polskich pociągów (SKM Trójmiasto, PolRegio, Intercity…; GTFS z mkuran.pl na danych PKP PLK) i pokazuje przewoźnika, numer, skąd i dokąd jedzie oraz planową godzinę. Rozkład (30 MB) pobiera się przez Wi-Fi raz na 3 dni; opóźnienia nie są uwzględniane.
+- Ryciny dźwięków i psów generują się w tle, gdy dany dźwięk lub pies pojawi się pierwszy raz, więc Dziennik od razu ma ich miniatury (np. koń). Samoloty dalej na dotknięcie.
+
 ## 0.4.0 - 2026-10-04
 
 - Dziennik: miniatura ryciny przy każdym wpisie (ptak, samolot, pies, dźwięk). Miniatury pokazują tylko ryciny zapisane w telefonie, więc przewijanie niczego nie generuje; płatną rycinę samolotu zamawia się dotknięciem wpisu. Darmowe tablice ptaków dociągają się same.

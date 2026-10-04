@@ -36,6 +36,17 @@ class Catalog(context: Context) {
 
     fun sound(key: String): Sound? = soundsByKey[key]
 
+    /** The engraving for one heard sound; a train gets its operator's livery. */
+    fun soundArt(sound: Sound, variant: String): pl.wojczal.ryciny.art.ArtRequest =
+        if (variant.isBlank()) {
+            pl.wojczal.ryciny.art.ArtRequest(pl.wojczal.ryciny.art.Kind.SCENE, sound.key, sound.now, prompt = sound.prompt)
+        } else {
+            pl.wojczal.ryciny.art.ArtRequest(
+                pl.wojczal.ryciny.art.Kind.SCENE, "${sound.key}-$variant", "${sound.now} ($variant)",
+                prompt = "${sound.prompt} The train wears the livery of the Polish rail operator $variant (its colours only, no readable lettering).",
+            )
+        }
+
     /** Body mass in grams per scientific name, from fugleramme's bird_sizes.csv. */
     val birdMass: Map<String, Double> = context.assets.open("bird_sizes.csv").bufferedReader().readLines().drop(1)
         .mapNotNull { line ->

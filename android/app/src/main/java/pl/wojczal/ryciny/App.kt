@@ -7,6 +7,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import pl.wojczal.ryciny.art.Art
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import pl.wojczal.ryciny.art.ArtRequest
+import pl.wojczal.ryciny.art.Kind
 import pl.wojczal.ryciny.audio.Analyzer
 import pl.wojczal.ryciny.audio.Live
 import pl.wojczal.ryciny.data.Catalog
@@ -14,6 +19,7 @@ import pl.wojczal.ryciny.data.Place
 import pl.wojczal.ryciny.data.SettingsStore
 import pl.wojczal.ryciny.data.Store
 import pl.wojczal.ryciny.planes.Sky
+import pl.wojczal.ryciny.rails.Rails
 
 class App : Application() {
     lateinit var graph: Graph
@@ -34,10 +40,30 @@ class Graph(val context: Context) {
     val catalog by lazy { Catalog(context) }
     val art = Art(context, settings, scope)
     val sky = Sky(settings, place, store, scope)
+    val rails = Rails(context, settings, place, scope)
     val live = MutableStateFlow(Live())
 
+    init {
+        // Sounds and dog breeds are a short, fixed list, so each gets its engraving as soon as it is first
+        // heard, in the background: the journal's thumbnails then never wait for a visit to the plate.
+        // Aircraft are left to a tap: there are far more type and livery pairs.
+        scope.launch {
+            store.flow
+                .map { j ->
+                    val sounds = j.sounds.mapNotNull { e -> catalog.sound(e.key)?.let { catalog.soundArt(it, e.variant) } }
+                    val dogs = j.barks.map { b ->
+                        j.dogs.firstOrNull { it.id == b.dogId }?.let { ArtRequest(Kind.DOG, it.breed, it.breedEn) }
+                            ?: catalog.mongrel(b.size).let { ArtRequest(Kind.DOG, it.pl, it.en) }
+                    }
+                    (sounds + dogs).distinctBy { it.kind to it.key }
+                }
+                .distinctUntilChanged()
+                .collect { wanted -> wanted.filter { art.cached(it) == null }.forEach { runCatching { art.load(it) } } }
+        }
+    }
+
     /** Loads ~80 MB of models: touch it off the main thread only. */
-    val analyzer by lazy { Analyzer(context, settings, place, store, sky, live, catalog.sounds) }
+    val analyzer by lazy { Analyzer(context, settings, place, store, sky, live, catalog.sounds, rails) }
 }
 
 val Context.graph: Graph get() = (applicationContext as App).graph

@@ -10,6 +10,7 @@ import pl.wojczal.ryciny.data.Store
 import pl.wojczal.ryciny.ml.BirdNet
 import pl.wojczal.ryciny.ml.Yamnet
 import pl.wojczal.ryciny.planes.Sky
+import pl.wojczal.ryciny.rails.Rails
 import java.io.File
 import java.util.UUID
 
@@ -31,6 +32,7 @@ class Analyzer(
     private val sky: Sky,
     private val state: MutableStateFlow<Live>,
     private val sounds: List<Sound>,
+    private val rails: Rails,
 ) {
     private val birdNet = BirdNet(context)
     private val yamnet = Yamnet(context)
@@ -48,7 +50,13 @@ class Analyzer(
         if (aircraft >= AIRCRAFT_THRESHOLD) sky.heard(at)
         sounds.forEach { sound ->
             val score = frames.maxOf { f -> sound.classes.maxOf { f.scores[it] } }
-            if (score >= sound.threshold) store.addSound(sound.key, at, score)
+            if (score < sound.threshold) return@forEach
+            val train = if (sound.key == "train") rails.match(at) else null
+            if (train == null) {
+                store.addSound(sound.key, at, score)
+            } else {
+                store.addSound(sound.key, at, score, train.title, "${train.route} · planowo ${hhmm(train.passSec)}", train.agency)
+            }
         }
         if (dogScores.max() >= s.barkThreshold) bark(audio16, frames, dogScores, at, s.barkThreshold, s.dogMatch)
     }
@@ -100,6 +108,8 @@ class Analyzer(
             ),
         )
     }
+
+    private fun hhmm(sec: Int) = "%02d:%02d".format(sec / 3600, sec % 3600 / 60)
 
     companion object {
         const val AIRCRAFT_THRESHOLD = 0.25f

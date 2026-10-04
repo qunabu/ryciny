@@ -48,7 +48,7 @@ import java.io.File
 
 private sealed interface Entry { val at: Long }
 private data class BirdEntry(val name: String, val sci: String, val conf: Float, val count: Int, override val at: Long) : Entry
-private data class SoundEntry(val sound: Sound, val from: Long, override val at: Long) : Entry
+private data class SoundEntry(val sound: Sound, val event: pl.wojczal.ryciny.data.SoundEvent, val from: Long, override val at: Long) : Entry
 private data class BarkEntry(val bark: Bark, val dog: String?, override val at: Long) : Entry
 private data class PlaneEntry(val pass: PlanePass, val title: String, val detail: String, val heard: Boolean, override val at: Long) : Entry
 
@@ -64,7 +64,7 @@ fun JournalScreen(g: Graph) {
         if (filter in setOf("all", "birds")) journal.birds.forEach { add(BirdEntry(it.name, it.sci, it.conf, it.count, it.lastAt)) }
         if (filter in setOf("all", "dogs")) journal.barks.forEach { add(BarkEntry(it, it.dogId?.let { id -> dogs[id]?.let { d -> "${d.name} (${d.breed})" } }, it.lastAt)) }
         if (filter in setOf("all", "sounds")) journal.sounds.forEach { e ->
-            g.catalog.sound(e.key)?.let { add(SoundEntry(it, e.at, e.lastAt)) }
+            g.catalog.sound(e.key)?.let { add(SoundEntry(it, e, e.at, e.lastAt)) }
         }
         if (filter in setOf("all", "planes")) journal.planes.forEach {
             add(PlaneEntry(it, "${it.title} · ${it.callsign}", listOf(it.airline, it.route, "${km(it.minDistKm.toDouble())}" + (it.minAltM?.let { a -> ", $a m" } ?: "")).filter { s -> s.isNotBlank() }.joinToString(" · "), it.heard, it.lastAt))
@@ -83,8 +83,10 @@ fun JournalScreen(g: Graph) {
             items(entries) { e ->
                 when (e) {
                     is SoundEntry -> Line(
-                        hhmm(e.at), e.sound.past, "${hhmm(e.from)}–${hhmm(e.at)}",
-                        ArtRequest(Kind.SCENE, e.sound.key, e.sound.now, prompt = e.sound.prompt), fetch = false,
+                        hhmm(e.at),
+                        if (e.event.title.isBlank()) e.sound.past else "${e.sound.past}: ${e.event.title}",
+                        listOf("${hhmm(e.from)}–${hhmm(e.at)}", e.event.subtitle).filter { it.isNotBlank() }.joinToString(" · "),
+                        g.catalog.soundArt(e.sound, e.event.variant), fetch = false,
                     )
                     is BirdEntry -> Line(
                         hhmm(e.at), e.name.replaceFirstChar { it.uppercase() },

@@ -74,6 +74,11 @@ data class SoundEvent(
     val lastAt: Long,
     val count: Int = 1,
     val score: Float,
+    /** What exactly was heard, when the app can tell: for a train, its number and operator. */
+    val title: String = "",
+    val subtitle: String = "",
+    /** Picks a more specific engraving, e.g. the train operator's livery. */
+    val variant: String = "",
 )
 
 /** Written by 0.2.0, read once to carry its mowing over into [SoundEvent]s. */
@@ -174,12 +179,19 @@ class Store(private val dir: File, scope: CoroutineScope) {
         )
     }
 
-    fun addSound(key: String, at: Long, score: Float) = state.update { j ->
+    fun addSound(key: String, at: Long, score: Float, title: String = "", subtitle: String = "", variant: String = "") = state.update { j ->
         val last = j.sounds.lastOrNull { it.key == key }
-        val sounds = if (last != null && at - last.lastAt < SOUND_GAP_MS) {
-            j.sounds.map { if (it === last) it.copy(lastAt = at, count = it.count + 1, score = maxOf(it.score, score)) else it }
+        // Two different trains a few minutes apart are two events, not one long one.
+        val same = last != null && at - last.lastAt < SOUND_GAP_MS && (title.isBlank() || last.title.isBlank() || title == last.title)
+        val sounds = if (same) {
+            j.sounds.map {
+                if (it !== last) it else it.copy(
+                    lastAt = at, count = it.count + 1, score = maxOf(it.score, score),
+                    title = it.title.ifBlank { title }, subtitle = it.subtitle.ifBlank { subtitle }, variant = it.variant.ifBlank { variant },
+                )
+            }
         } else {
-            j.sounds + SoundEvent(key, at, at, 1, score)
+            j.sounds + SoundEvent(key, at, at, 1, score, title, subtitle, variant)
         }
         j.copy(sounds = sounds.filter { at - it.lastAt < KEEP_MS }.takeLast(MAX_SOUNDS))
     }

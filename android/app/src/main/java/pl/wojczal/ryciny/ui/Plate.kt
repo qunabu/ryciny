@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import pl.wojczal.ryciny.Graph
+import pl.wojczal.ryciny.graph
 import pl.wojczal.ryciny.art.ArtRequest
 import pl.wojczal.ryciny.art.Kind
 import pl.wojczal.ryciny.audio.ListenService
@@ -201,9 +202,11 @@ private fun LiveStrip(listening: Boolean, sound: String, error: String?) {
 
 @Composable
 private fun SoundPlate(sound: Sound, e: SoundEvent, now: Long) {
-    Engraving(ArtRequest(Kind.SCENE, sound.key, sound.now, prompt = sound.prompt), height = 260.dp, modifier = Modifier.fillMaxWidth())
+    Engraving(LocalContext.current.graph.catalog.soundArt(sound, e.variant), height = 260.dp, modifier = Modifier.fillMaxWidth())
     val still = now - e.lastAt < 2 * 60_000L
     Caption(if (still) sound.now else sound.past, size = 28, italic = false)
+    if (e.title.isNotBlank()) Caption(e.title, size = 20)
+    if (e.subtitle.isNotBlank()) Caption(e.subtitle, size = 17, italic = false)
     val minutes = ((e.lastAt - e.at) / 60_000L).coerceAtLeast(1)
     Caption(if (still) "od ${hhmm(e.at)} · już $minutes min" else "${hhmm(e.at)}–${hhmm(e.lastAt)} · $minutes min", size = 15, color = InkSoft)
 }

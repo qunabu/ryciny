@@ -50,6 +50,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
     implementation("com.google.ai.edge.litert:litert:1.4.1")
+    testImplementation("junit:junit:4.13.2")
 }
 
 // style.json, dog_breeds.json and aircraft_types.json live in ../shared so the Raspberry Pi version reads the same files.

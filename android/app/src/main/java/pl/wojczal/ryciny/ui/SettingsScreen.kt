@@ -96,6 +96,24 @@ fun SettingsScreen(g: Graph) {
             g.settings.update { it.copy(overheadMaxAltM = (v / 250).roundToInt() * 250) }
         }
 
+        Section("Pociągi")
+        val rails by g.rails.flow.collectAsState()
+        Toggle("Rozpoznawaj pociągi z rozkładu (PKP PLK, raz na 3 dni pobiera 30 MB)", s.trains) { v ->
+            g.settings.update { it.copy(trains = v) }
+            if (v) scope.launch(kotlinx.coroutines.Dispatchers.IO) { g.rails.ensureToday() }
+        }
+        Text(
+            when {
+                rails.busy -> "Pobieram i przeliczam rozkład…"
+                rails.error != null -> "Rozkład: błąd (${rails.error})"
+                rails.passes.isEmpty() -> "Brak pociągów w promieniu 1,5 km od domu."
+                else -> "Dziś obok domu: ${rails.passes.size} pociągów (${rails.passes.map { it.agency }.distinct().joinToString()}), " +
+                    "odcinek ${rails.passes.groupingBy { it.between }.eachCount().maxBy { it.value }.key}."
+            },
+            color = InkSoft,
+        )
+        Button(onClick = { scope.launch(kotlinx.coroutines.Dispatchers.IO) { g.rails.ensureToday(force = true) } }) { Text("Odśwież rozkład") }
+
         Section("Ptaki")
         Slide("Minimalna pewność BirdNET: ${(s.birdThreshold * 100).roundToInt()}%", s.birdThreshold, 0.3f..0.95f) { v -> g.settings.update { it.copy(birdThreshold = v) } }
         Toggle("Tylko gatunki występujące tu o tej porze roku", s.rangeFilter) { v -> g.settings.update { it.copy(rangeFilter = v) } }

@@ -31,6 +31,7 @@ data class Settings(
     val lat: Double = HOME_LAT,
     val lon: Double = HOME_LON,
     val keepScreenOn: Boolean = true,
+    val trains: Boolean = true,
 )
 
 class SettingsStore(dir: File, private val scope: CoroutineScope) {
