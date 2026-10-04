@@ -33,6 +33,10 @@ data class Airport(val iata: String, val city: String, val lat: Double? = null, 
 fun planeArt(typeCode: String, airlineIcao: String, title: String, airline: String) =
     pl.wojczal.ryciny.art.ArtRequest(pl.wojczal.ryciny.art.Kind.PLANE, "$typeCode-${airlineIcao.ifBlank { "plain" }}", title, airline)
 
+/** A logged pass's engraving; passes logged before the type code was kept fall back to their title. */
+fun pl.wojczal.ryciny.data.PlanePass.art() =
+    planeArt(typeCode.ifBlank { title }, airlineIcao.ifBlank { airline }, title, airline)
+
 data class Plane(
     val hex: String,
     val callsign: String,

@@ -43,7 +43,7 @@ import pl.wojczal.ryciny.art.Kind
 import pl.wojczal.ryciny.data.Bark
 import pl.wojczal.ryciny.data.Sound
 import pl.wojczal.ryciny.data.PlanePass
-import pl.wojczal.ryciny.planes.planeArt
+import pl.wojczal.ryciny.planes.art
 import java.io.File
 
 private sealed interface Entry { val at: Long }
@@ -66,7 +66,8 @@ fun JournalScreen(g: Graph) {
         if (filter in setOf("all", "sounds")) journal.sounds.forEach { e ->
             g.catalog.sound(e.key)?.let { add(SoundEntry(it, e, e.at, e.lastAt)) }
         }
-        if (filter in setOf("all", "planes")) journal.planes.forEach {
+        val onlyHeard = g.settings.value.onlyHeardPlanes
+        if (filter in setOf("all", "planes")) journal.planes.filter { it.heard || !onlyHeard }.forEach {
             add(PlaneEntry(it, "${it.title} · ${it.callsign}", listOf(it.airline, it.route, "${km(it.minDistKm.toDouble())}" + (it.minAltM?.let { a -> ", $a m" } ?: "")).filter { s -> s.isNotBlank() }.joinToString(" · "), it.heard, it.lastAt))
         }
     }.sortedByDescending { it.at }.take(400)
@@ -96,7 +97,7 @@ fun JournalScreen(g: Graph) {
                     // A plane's engraving is paid for, so it is made on a tap, not by scrolling past.
                     is PlaneEntry -> Line(
                         hhmm(e.at), e.title, e.detail + if (e.heard) " · słyszany" else "",
-                        passArt(e.pass), fetch = false, onClick = { viewing = e.pass },
+                        e.pass.art(), fetch = false, onClick = { viewing = e.pass },
                     )
                     is BarkEntry -> BarkLine(g, e.bark, e.dog) { tagging = e.bark }
                 }
@@ -131,10 +132,7 @@ private fun Line(
     }
 }
 
-/** The engraving a logged plane shares with every plane of its type in its airline's colours. */
-private fun passArt(pass: PlanePass) =
-    // Passes logged before the type code was kept fall back to their title as the picture's key.
-    planeArt(pass.typeCode.ifBlank { pass.title }, pass.airlineIcao.ifBlank { pass.airline }, pass.title, pass.airline)
+
 
 @Composable
 private fun BarkLine(g: Graph, bark: Bark, dog: String?, onTag: () -> Unit) {
@@ -224,7 +222,7 @@ private fun TagDialog(g: Graph, bark: Bark, onDone: () -> Unit) {
 /** A past plane's engraving: generated on first look if this type and livery has none yet. */
 @Composable
 private fun PlaneDialog(pass: PlanePass, onDone: () -> Unit) {
-    val art = passArt(pass)
+    val art = pass.art()
     AlertDialog(
         onDismissRequest = onDone,
         containerColor = Paper,

@@ -37,7 +37,9 @@ import pl.wojczal.ryciny.data.Dog
 import pl.wojczal.ryciny.data.Sound
 import pl.wojczal.ryciny.data.SoundEvent
 import pl.wojczal.ryciny.planes.Plane
+import pl.wojczal.ryciny.planes.art
 import pl.wojczal.ryciny.planes.planeArt
+import pl.wojczal.ryciny.data.PlanePass
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -62,7 +64,7 @@ fun rememberNow(): Long {
 
 /** One thing to draw: the plane overhead, the last bird, the last dog, or the last of each sound in sounds.json. */
 private sealed interface Subject { val at: Long }
-private data class PlaneSubject(val plane: Plane, override val at: Long) : Subject
+private data class PlaneSubject(val live: Plane?, val pass: PlanePass?, override val at: Long) : Subject
 private data class BirdSubject(val bird: BirdHit, val count: Int, override val at: Long) : Subject
 private data class SoundSubject(val sound: Sound, val event: SoundEvent, override val at: Long) : Subject
 private data class DogSubject(val dog: Dog?, val barks: List<Bark>, override val at: Long) : Subject
@@ -78,10 +80,17 @@ fun PlateScreen(g: Graph) {
     val since = now - settings.lookbackHours * 3600_000L
 
     val subjects = buildList {
-        sky.overhead?.let { p ->
-            // A plane counts from when it came overhead, so one that lingers does not hold the page forever.
-            val pass = journal.planes.lastOrNull { it.hex == p.hex }
-            add(PlaneSubject(p, pass?.at ?: sky.updatedAt))
+        if (settings.onlyHeardPlanes) {
+            // Only a plane the microphone heard; live details while it is still the one overhead.
+            journal.planes.filter { it.heard && it.lastAt >= since }.maxByOrNull { it.lastAt }?.let { pass ->
+                add(PlaneSubject(sky.overhead?.takeIf { it.hex == pass.hex }, pass, pass.at))
+            }
+        } else {
+            sky.overhead?.let { p ->
+                // A plane counts from when it came overhead, so one that lingers does not hold the page forever.
+                val pass = journal.planes.lastOrNull { it.hex == p.hex }
+                add(PlaneSubject(p, pass, pass?.at ?: sky.updatedAt))
+            }
         }
         journal.birds.filter { it.lastAt >= since }.maxByOrNull { it.lastAt }?.let { b ->
             add(BirdSubject(b, journal.birds.filter { it.sci == b.sci && it.lastAt >= since }.sumOf { it.count }, b.lastAt))
@@ -113,7 +122,7 @@ fun PlateScreen(g: Graph) {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             when (subject) {
-                is PlaneSubject -> PlanePlate(subject.plane, now - sky.heardAt < 20_000)
+                is PlaneSubject -> if (subject.live != null) PlanePlate(subject.live, now - sky.heardAt < 20_000) else PassPlate(subject.pass!!)
                 is BirdSubject -> BirdPlate(subject.bird, subject.count)
                 is DogSubject -> DogPlate(g, subject.dog, subject.barks)
                 is SoundSubject -> SoundPlate(subject.sound, subject.event, now)
@@ -156,6 +165,19 @@ private fun PlanePlate(p: Plane, heard: Boolean) {
         size = 15, color = InkSoft,
     )
     if (heard) Caption("— słychać go teraz —", size = 15, color = Rubric)
+}
+
+/** A plane heard a while ago, no longer overhead: drawn from the journal. */
+@Composable
+private fun PassPlate(p: PlanePass) {
+    Engraving(p.art(), height = 260.dp, modifier = Modifier.fillMaxWidth())
+    Caption(p.title, size = 28)
+    Caption(listOf(p.airline, p.callsign).filter { it.isNotBlank() }.joinToString(" · "), size = 17)
+    if (p.route.isNotBlank()) Caption(p.route, size = 19, italic = false)
+    Caption(
+        "słychać było o ${hhmm(p.at)} · najbliżej ${km(p.minDistKm.toDouble())}" + (p.minAltM?.let { ", wys. ${String.format(PL, "%,d", it)} m" } ?: ""),
+        size = 15, color = InkSoft,
+    )
 }
 
 @Composable

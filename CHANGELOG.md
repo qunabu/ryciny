@@ -3,6 +3,11 @@
 Numeracja: `MAJOR.MINOR.PATCH` (semver). Wersja jest w `android/gradle.properties` (`ryciny.version`),
 tag w gicie to `vX.Y.Z`, a każdy tag ma release z plikiem APK.
 
+## 0.6.0 - 2026-10-04
+
+- Samoloty: rycina i Dziennik pokazują tylko te, które mikrofon usłyszał (YAMNet: silnik odrzutowy, śmigło, samolot). Pozostałe przeloty dalej zapisują się w tle, ale nie są pokazywane, więc nie generują się dla nich ryciny. Przełącznik „Pokazuj tylko samoloty, które słychać” w Ustawieniach przywraca wszystkie.
+- Rycina usłyszanego samolotu zostaje na ekranie także po jego odlocie (z godziną i najmniejszą odległością).
+
 ## 0.5.4 - 2026-10-04
 
 - Naprawione pociągi: rozkład w ogóle się nie pobierał, bo brakowało uprawnienia `ACCESS_NETWORK_STATE` (sprawdzanie typu sieci rzucało wyjątek, który po cichu przerywał przeliczanie).

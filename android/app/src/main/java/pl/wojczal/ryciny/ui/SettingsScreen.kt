@@ -97,6 +97,7 @@ fun SettingsScreen(g: Graph) {
         Button(onClick = { g.settings.update { it.copy(lat = HOME_LAT, lon = HOME_LON) }; scope.launch { g.place.refresh() } }) { Text("Ustaw Gdańsk") }
 
         Section("Samoloty")
+        Toggle("Pokazuj tylko samoloty, które słychać", s.onlyHeardPlanes) { v -> g.settings.update { it.copy(onlyHeardPlanes = v) } }
         Slide("Promień: ${s.radiusKm.roundToInt()} km", s.radiusKm, 3f..60f) { v -> g.settings.update { it.copy(radiusKm = v) } }
         Slide("„Nad głową” poniżej ${s.overheadMaxAltM} m", s.overheadMaxAltM.toFloat(), 500f..12000f) { v ->
             g.settings.update { it.copy(overheadMaxAltM = (v / 250).roundToInt() * 250) }
