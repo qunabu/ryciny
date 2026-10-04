@@ -74,7 +74,8 @@ jobs:
         run: |
           apk="ryciny-v${{ steps.version.outputs.version }}.apk"
           want=$(keytool -list -v -keystore "$RYCINY_KEYSTORE" -storepass android | sed -n 's/.*SHA256: //p' | tr -d ':' | tr 'A-F' 'a-f' | head -1)
-          got=$("$ANDROID_HOME"/build-tools/*/apksigner verify --print-certs "$apk" | sed -n 's/.*SHA-256 digest: //p' | head -1)
+          apksigner=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
+          got=$("$apksigner" verify --print-certs "$apk" | sed -n 's/.*SHA-256 digest: //p' | head -1)
           echo "keystore $want"; echo "apk      $got"
           [[ -n "$want" && "$want" == "$got" ]]
 
