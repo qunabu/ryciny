@@ -3,6 +3,10 @@
 Numeracja: `MAJOR.MINOR.PATCH` (semver). Wersja jest w `android/gradle.properties` (`ryciny.version`),
 tag w gicie to `vX.Y.Z`, a każdy tag ma release z plikiem APK.
 
+## 0.8.0 - 2026-10-04
+
+- Ryciny można generować przez **OpenRouter**: Ustawienia → „Generowanie rycin” → OpenRouter, klucz `sk-or-…` i model (domyślnie `google/gemini-2.5-flash-image`, działa każdy model OpenRoutera generujący obrazy). Samoloty dostają proporcje 3:2, reszta 1:1.
+
 ## 0.7.2 - 2026-10-04
 
 - Owca i koza są domyślnie wyłączone: w mieście ich „beczenie” to były głosy dzieci, a te łapie osobna kategoria.

@@ -1,0 +1,83 @@
+# Builds the APK on every pull request, and publishes a GitHub release when a vX.Y.Z tag is pushed.
+#
+# The APK is signed with the same debug key as local builds, so a new version installs over the
+# old one without losing data. That key comes from the DEBUG_KEYSTORE_BASE64 secret:
+#   base64 -w0 ~/.android/debug.keystore   (macOS: base64 -i ~/.android/debug.keystore)
+# Without it a tag build stops instead of publishing an APK that would not install as an update;
+# pull request builds just use a throwaway key.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      # Licences only: the Android Gradle plugin downloads the platform compileSdk asks for.
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: "platform-tools"
+
+      - uses: gradle/actions/setup-gradle@v5
+
+      - name: Version
+        id: version
+        run: |
+          version=$(sed -n 's/^ryciny.version=//p' android/gradle.properties)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [[ "$GITHUB_REF_TYPE" == tag && "$GITHUB_REF_NAME" != "v$version" ]]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match ryciny.version=$version in android/gradle.properties"
+            exit 1
+          fi
+
+      - name: Signing key
+        env:
+          DEBUG_KEYSTORE_BASE64: ${{ secrets.DEBUG_KEYSTORE_BASE64 }}
+        run: |
+          if [[ -z "$DEBUG_KEYSTORE_BASE64" ]]; then
+            if [[ "$GITHUB_REF_TYPE" == tag ]]; then
+              echo "::error::Missing DEBUG_KEYSTORE_BASE64 secret (base64 of ~/.android/debug.keystore)"
+              exit 1
+            fi
+            echo "::warning::No DEBUG_KEYSTORE_BASE64 secret: this APK is signed with a throwaway key and will not install over the app"
+            exit 0
+          fi
+          mkdir -p ~/.android
+          echo "$DEBUG_KEYSTORE_BASE64" | base64 -d > ~/.android/debug.keystore
+
+      - name: Build
+        working-directory: android
+        run: ./gradlew --no-daemon assembleRelease
+
+      - name: Rename
+        run: cp android/app/build/outputs/apk/release/app-release.apk "ryciny-v${{ steps.version.outputs.version }}.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ryciny-v${{ steps.version.outputs.version }}
+          path: ryciny-v${{ steps.version.outputs.version }}.apk
+
+      - name: Release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          # The CHANGELOG section for this version, then the usual install note.
+          awk -v v="$VERSION" '$0 ~ "^## " v " " {on=1; next} /^## / {on=0} on' CHANGELOG.md | sed '/./,$!d' > notes.md
+          printf '\n**Instalacja:** pobierz `ryciny-v%s.apk` na telefon z Androidem 10 lub nowszym i otwórz go. Instaluje się na poprzednią wersję bez utraty danych.\n' "$VERSION" >> notes.md
+          gh release create "v$VERSION" "ryciny-v$VERSION.apk" --title "Ryciny $VERSION" --notes-file notes.md

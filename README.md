@@ -83,8 +83,9 @@ pobierane z jego repozytorium przy pierwszym użyciu). Samolotów i ras psów w 
 więc aplikacja generuje je w tym samym stylu:
 
 - **Claude (Anthropic) i ElevenLabs nie generują obrazów**, ich klucze tu nie pomogą.
-- Działa klucz **OpenAI** (`gpt-image-1`) albo **Google Gemini** (`gemini-2.5-flash-image`).
-  Wpisz go w Ustawieniach.
+- Działa klucz **OpenAI** (`gpt-image-1`), **Google Gemini** (`gemini-2.5-flash-image`) albo
+  **OpenRouter** (`sk-or-…`, domyślnie `google/gemini-2.5-flash-image`; można wpisać dowolny model OpenRoutera,
+  który generuje obrazy, np. `openai/gpt-5-image-mini`). Wpisz go w Ustawieniach.
 - Każdy typ samolotu w barwach danej linii (np. Embraer E175 LOT), każda rasa psa i każdy dźwięk okolicy powstają raz
   i zostają w telefonie. Nic nie jest generowane drugi raz: zamówiony obraz dokańcza się nawet po przełączeniu
   ekranu, a oryginał z API jest zapisywany przed wycinaniem tła. Ryciny minionych samolotów można też
@@ -147,7 +148,7 @@ android/app/src/main/java/pl/wojczal/ryciny/
   audio/                AudioRecord 48 kHz -> okna 3 s -> Analyzer (BirdNET + YAMNet), usługa w tle
   ml/                   BirdNET, filtr zasięgu, YAMNet (LiteRT)
   planes/               adsb.lol + adsbdb
-  art/                  tablice fugleramme, generowanie (OpenAI/Gemini), wycinanie z tła
+  art/                  tablice fugleramme, generowanie (OpenAI/Gemini/OpenRouter), wycinanie z tła
   data/                 dziennik (JSON), psy, ustawienia, eksport dla Pi
   ui/                   rycina, dziennik (z psami), ustawienia
 ```

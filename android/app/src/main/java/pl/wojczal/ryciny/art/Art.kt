@@ -99,7 +99,7 @@ class Art(private val context: Context, private val settings: SettingsStore, pri
 
     /**
      * Each picture is paid for once. The request runs in the app's scope, not the screen's, so
-     * tapping to the next plate mid-generation cannot throw away an image OpenAI already billed;
+     * tapping to the next plate mid-generation cannot throw away an image the API already billed;
      * a second caller for the same picture waits on the first. The image as it came from the API
      * is kept in `source/` before cutting, so a failed cut is redone from it rather than re-bought.
      */
@@ -125,6 +125,7 @@ class Art(private val context: Context, private val settings: SettingsStore, pri
                 val wide = req.kind == Kind.PLANE
                 val bytes = when (s.imageProvider) {
                     "gemini" -> gemini(s.geminiKey, s.geminiModel, prompt(req), wide)
+                    "openrouter" -> openRouter(s.openRouterKey, s.openRouterModel, prompt(req), wide)
                     else -> openAi(s.openAiKey, s.openAiModel, prompt(req), wide)
                 } ?: return null
                 source.parentFile?.mkdirs()
@@ -201,6 +202,31 @@ class Art(private val context: Context, private val settings: SettingsStore, pri
         val data = parts.firstNotNullOfOrNull { (it.jsonObject["inlineData"] as? JsonObject)?.get("data")?.jsonPrimitive?.content }
             ?: error("Gemini nie zwrócił obrazu")
         return Base64.decode(data, Base64.DEFAULT)
+    }
+
+    /**
+     * OpenRouter serves image models (Gemini, GPT-image, FLUX…) through its chat endpoint: the
+     * picture comes back in `message.images` as a data URL, or for some models a plain link.
+     */
+    private suspend fun openRouter(key: String, model: String, prompt: String, wide: Boolean): ByteArray? {
+        if (key.isBlank()) return null
+        val body = buildJsonObject {
+            put("model", model)
+            putJsonArray("messages") { add(buildJsonObject { put("role", "user"); put("content", prompt) }) }
+            putJsonArray("modalities") { add("image"); add("text") }
+            putJsonObject("image_config") { put("aspect_ratio", if (wide) "3:2" else "1:1") }
+        }
+        val res = Http.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            body.toString(),
+            mapOf("Authorization" to "Bearer $key", "X-Title" to "Ryciny"),
+        )
+        val message = json.parseToJsonElement(res.decodeToString()).jsonObject["choices"]?.jsonArray?.firstOrNull()
+            ?.jsonObject?.get("message")?.jsonObject ?: error("OpenRouter nie zwrócił obrazu")
+        val url = (message["images"] as? JsonArray)?.firstNotNullOfOrNull {
+            ((it as? JsonObject)?.get("image_url") as? JsonObject)?.get("url")?.jsonPrimitive?.contentOrNull
+        } ?: error("OpenRouter nie zwrócił obrazu (czy model $model generuje obrazy?)")
+        return if (url.startsWith("data:")) Base64.decode(url.substringAfter(","), Base64.DEFAULT) else Http.get(url)
     }
 
     private fun recentlyFailed(key: String) = (failedAt[key] ?: 0L) + RETRY_MS > System.currentTimeMillis()
