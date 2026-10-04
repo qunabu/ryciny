@@ -153,6 +153,11 @@ android/app/src/main/java/pl/wojczal/ryciny/
   ui/                   rycina, dziennik (z psami), ustawienia
 ```
 
+## Home Assistant
+
+Plan przeniesienia nasłuchu na komputer z Home Assistant (HA OS), z telefonem tylko jako ekranem:
+[plan.md](plan.md). Czeka na mikrofon.
+
 ## Etap 2: Raspberry Pi + kolorowy e-ink
 
 Plan: nie przepisywać fugleramme, tylko dołożyć do niego dwa źródła.
