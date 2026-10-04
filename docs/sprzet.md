@@ -1,6 +1,34 @@
-# Sprzęt do kupienia
+# Sprzęt
 
-Ramka na stałe: używany tablet z Androidem i zewnętrzny mikrofon za oknem. Ceny z października 2026.
+## Zamówione (4 października 2026, AliExpress)
+
+| Co | Model | Sprzedawca | Cena | Razem z dostawą |
+| --- | --- | --- | --- | --- |
+| Mikrofon | [Primo EM272Z1, krawatowy, ręcznie robiony, kabel 1,5 m, wtyczka 3,5 mm TRS](https://pl.aliexpress.com/item/1005009770962671.html) | Micverve Store | 174,59 zł | 206,57 zł |
+| Przedłużacz | [CableCreation 3,5 mm TRS, męski → żeński, 4,5 m](https://pl.aliexpress.com/item/1005004731100981.html) | FengMei Store | 30,19 zł | 50,01 zł |
+
+- Mikrofon ma kapsułę Primo EM272Z1, tę samą co Clippy EM272 polecany przez BirdNET-Pi (szum własny ok. 14 dB(A)).
+  W zestawie są osłony od wiatru: piankowa i futrzana.
+- Wtyczki są TRS (stereo, bez mikrofonowego pierścienia telefonu), więc mikrofon z przedłużaczem wchodzi prosto
+  do karty dźwiękowej USB. Do tabletu albo telefonu potrzebna byłaby jeszcze przejściówka TRS → TRRS (np. Rode SC4).
+- Złączkę mikrofonu z przedłużaczem trzymaj w środku, nie za oknem, a kabla nie zwijaj przy zasilaczach,
+  bo 4,5 m nieekranowanego kabla łapie przydźwięk.
+
+## Następny etap: podłączenie do Home Assistant
+
+Mikrofon trafi do komputera z Home Assistant (HA OS), który będzie zbierał dźwięki 24/7, a telefon czy tablet
+tylko je wyświetlał. Plan: [plan.md](../plan.md).
+
+Do dokupienia:
+
+| Co | Po co | Ile |
+| --- | --- | --- |
+| Karta dźwiękowa USB z wejściem mikrofonowym (np. UGREEN) | daje mikrofonowi zasilanie (plug-in power) i wpuszcza dźwięk do HA | ok. 40 zł |
+| Przedłużacz USB (opcjonalnie) | jeśli komputer z HA stoi dalej niż 4,5 m od okna: karta przy oknie, dźwięk po USB cyfrowo, bez szumu | ok. 20–40 zł |
+
+## Wariant bez Home Assistant: tablet jako ramka
+
+Używany tablet z Androidem i zewnętrzny mikrofon za oknem, z aplikacją nasłuchującą na tablecie. Ceny z października 2026.
 
 | Co | Model | Gdzie | Ile |
 | --- | --- | --- | --- |

@@ -57,7 +57,8 @@ Same ryciny, tak jak zapisuje je aplikacja: wygenerowane raz, wycięte z tła i 
 
 ## Sprzęt
 
-Na stałą ramkę: używany Samsung Galaxy Tab A7 z OLX (ok. 300–450 zł) i mikrofon Clippy EM272 za oknem.
+Zamówiony: mikrofon Primo EM272Z1 z przedłużaczem 4,5 m, który trafi do komputera z Home Assistant
+([plan.md](plan.md)). Wariant bez HA: używany Samsung Galaxy Tab A7 z OLX jako ramka.
 Szczegóły, ceny i montaż: [docs/sprzet.md](docs/sprzet.md).
 
 ## Instalacja na telefonie
