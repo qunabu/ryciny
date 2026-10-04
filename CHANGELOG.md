@@ -3,6 +3,13 @@
 Numeracja: `MAJOR.MINOR.PATCH` (semver). Wersja jest w `android/gradle.properties` (`ryciny.version`),
 tag w gicie to `vX.Y.Z`, a każdy tag ma release z plikiem APK.
 
+## 0.5.4 - 2026-10-04
+
+- Naprawione pociągi: rozkład w ogóle się nie pobierał, bo brakowało uprawnienia `ACCESS_NETWORK_STATE` (sprawdzanie typu sieci rzucało wyjątek, który po cichu przerywał przeliczanie).
+- Pierwsze pobranie rozkładu (30 MB) idzie przez każdą sieć; część telefonów zgłasza domowe Wi-Fi jako taryfowe. Odświeżanie co 3 dni dalej czeka na sieć bez limitu.
+- Rozkład liczy się dopiero po ustaleniu lokalizacji, a trasy dzisiejszych pociągów przeliczają się przy każdej zmianie rozkładu (wcześniej mogły dostać trasę z linii w centrum Gdańska).
+- Logi rozkładu w `adb logcat -s Rails`.
+
 ## 0.5.3 - 2026-10-04
 
 - Samoloty: trasa z adsbdb jest pokazywana tylko wtedy, gdy samolot jest przy jednym z lotnisk albo w promieniu 300 km od linii między nimi. adsbdb przypisuje trasy do numerów lotów, które linie wykorzystują ponownie, więc nad Gdańskiem pojawiało się np. „Abu Zabi → Budapeszt”.

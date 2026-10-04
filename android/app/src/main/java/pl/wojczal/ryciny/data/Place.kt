@@ -23,6 +23,9 @@ data class LatLon(val lat: Double, val lon: Double, val fromGps: Boolean)
 class Place(private val context: Context, private val settings: SettingsStore, scope: CoroutineScope) {
     private val state = MutableStateFlow(fallback())
     val flow: StateFlow<LatLon> = state
+    private val _resolved = MutableStateFlow(false)
+    /** False until the first fix (or the decision to use the fallback) is in; the start-up value is only a guess. */
+    val resolved: StateFlow<Boolean> = _resolved
     val value: LatLon get() = state.value
 
     init {
@@ -38,10 +41,12 @@ class Place(private val context: Context, private val settings: SettingsStore, s
         val s = settings.value
         if (!s.useGps || !allowed()) {
             state.value = fallback()
+            _resolved.value = true
             return
         }
         val fix = current() ?: lastKnown()
         state.value = fix?.let { LatLon(it.latitude, it.longitude, true) } ?: fallback()
+        _resolved.value = true
     }
 
     private fun fallback() = settings.value.let { LatLon(it.lat, it.lon, false) }

@@ -63,7 +63,8 @@ class Graph(val context: Context) {
     }
 
     init {
-        // A train heard while the timetable was still loading gets its route once the timetable is in.
+        // A train heard while the timetable was loading, or matched against a timetable for the wrong place,
+        // gets its route again whenever the timetable changes.
         scope.launch {
             rails.flow.map { it.date to it.passes.size }.distinctUntilChanged().collect {
                 val today = java.time.LocalDate.now(java.time.ZoneId.of("Europe/Warsaw"))

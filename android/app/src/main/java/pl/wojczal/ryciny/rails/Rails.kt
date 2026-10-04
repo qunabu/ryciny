@@ -1,12 +1,15 @@
 package pl.wojczal.ryciny.rails
 
 import android.content.Context
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -72,7 +75,8 @@ class Rails(private val context: Context, private val settings: SettingsStore, p
     init {
         // Right after start the place is the Gdańsk fallback until GPS answers: recount as soon as it moves.
         scope.launch(Dispatchers.IO) {
-            place.flow.map { "${Math.round(it.lat * 100)}-${Math.round(it.lon * 100)}" }.distinctUntilChanged()
+            combine(place.flow, place.resolved) { p, ready -> if (ready) "${Math.round(p.lat * 100)}-${Math.round(p.lon * 100)}" else null }
+                .filterNotNull().distinctUntilChanged()
                 .collect { runCatching { ensureToday() } }
         }
         scope.launch(Dispatchers.IO) {
@@ -87,51 +91,60 @@ class Rails(private val context: Context, private val settings: SettingsStore, p
     fun match(at: Long): TrainPass? {
         val now = LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(at), ZONE)
         val sec = now.toLocalTime().toSecondOfDay()
-        return state.value.passes.minByOrNull { abs(it.passSec - sec) }?.takeIf { abs(it.passSec - sec) <= WINDOW_SEC }
+        val best = state.value.passes.minByOrNull { abs(it.passSec - sec) }
+        Log.i(TAG, "match $now: ${state.value.passes.size} passes, nearest ${best?.hhmm} ${best?.title}")
+        return best?.takeIf { abs(it.passSec - sec) <= WINDOW_SEC }
     }
 
     suspend fun ensureToday(force: Boolean = false) = lock.withLock {
-        if (!settings.value.trains) return@withLock
+        if (!settings.value.trains) { Log.i(TAG, "trains off"); return@withLock }
+        if (!place.resolved.value) { Log.i(TAG, "waiting for a location"); return@withLock }
         val today = LocalDate.now(ZONE)
         val key = today.format(DateTimeFormatter.BASIC_ISO_DATE)
         val here = place.value
         val spot = "${Math.round(here.lat * 100)}-${Math.round(here.lon * 100)}"
         val index = File(dir, "passes-$key-$spot.json")
         if (!force && state.value.date == key && state.value.place == spot) return@withLock
+        Log.i(TAG, "ensureToday $key spot=$spot gps=${here.fromGps} force=$force")
         if (!force && index.exists()) {
             state.value = RailsState(key, spot, json.decodeFromString(ListSerializer(TrainPass.serializer()), index.readText()))
+            Log.i(TAG, "loaded ${state.value.passes.size} passes from ${index.name}")
             return@withLock
         }
         val stale = !feed.exists() || System.currentTimeMillis() - feed.lastModified() > FEED_MAX_AGE_MS
-        // 30 MB is for Wi-Fi; on mobile data only a tap on "Odśwież rozkład" fetches it.
-        if (stale && !force && metered()) {
-            if (!feed.exists()) {
-                state.value = state.value.copy(error = "czekam na Wi-Fi, żeby pobrać rozkład (30 MB)")
-                return@withLock
-            }
-        }
+        val metered = metered()
         state.value = state.value.copy(busy = true, error = null)
         try {
-            if (force || (stale && !metered()) || !feed.exists()) download()
+            // Without any timetable the 30 MB comes over whatever network there is: some phones call their
+            // home Wi-Fi metered. Only the refresh every few days waits for an unmetered one.
+            if (force || !feed.exists() || (stale && !metered)) download()
+            else if (stale) Log.i(TAG, "feed is stale, waiting for an unmetered network")
+            val started = System.currentTimeMillis()
             val passes = Timetable.passes(feed, key, here.lat, here.lon)
+            Log.i(TAG, "built ${passes.size} passes in ${System.currentTimeMillis() - started} ms")
             index.writeText(json.encodeToString(ListSerializer(TrainPass.serializer()), passes))
             dir.listFiles()?.filter { it.name.startsWith("passes-") && it != index }?.forEach { it.delete() }
             state.value = RailsState(key, spot, passes)
         } catch (e: Exception) {
+            Log.e(TAG, "timetable failed", e)
             state.value = state.value.copy(busy = false, error = e.message ?: e.javaClass.simpleName)
         }
     }
 
-    private fun metered(): Boolean =
+    private fun metered(): Boolean = runCatching {
         context.getSystemService(android.net.ConnectivityManager::class.java)?.isActiveNetworkMetered ?: true
+    }.getOrDefault(true)
 
     private suspend fun download() {
         val tmp = File(dir, "polish_trains.zip.tmp")
+        Log.i(TAG, "downloading $FEED_URL")
         tmp.writeBytes(Http.get(FEED_URL))
         tmp.renameTo(feed)
+        Log.i(TAG, "downloaded ${feed.length()} bytes")
     }
 
     companion object {
+        private const val TAG = "Rails"
         const val FEED_URL = "https://mkuran.pl/gtfs/polish_trains.zip"
         private const val FEED_MAX_AGE_MS = 3 * 24 * 3600_000L
         private const val WINDOW_SEC = 5 * 60
