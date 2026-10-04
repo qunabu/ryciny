@@ -52,6 +52,11 @@ Same ryciny, tak jak zapisuje je aplikacja: wygenerowane raz, wycięte z tła i 
 | ![Gramofon](docs/ryciny/gramofon.png) | | |
 | Muzyka u sąsiadów | | |
 
+## Sprzęt
+
+Na stałą ramkę: używany Samsung Galaxy Tab A7 z OLX (ok. 300–450 zł) i mikrofon Clippy EM272 za oknem.
+Szczegóły, ceny i montaż: [docs/sprzet.md](docs/sprzet.md).
+
 ## Instalacja na telefonie
 
 Pobierz `ryciny-vX.Y.Z.apk` z [ostatniego wydania](../../releases/latest), prześlij go na telefon i otwórz.
