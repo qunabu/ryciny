@@ -27,7 +27,7 @@ import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-data class Airport(val iata: String, val city: String)
+data class Airport(val iata: String, val city: String, val lat: Double? = null, val lon: Double? = null)
 
 /** The engraving of one aircraft type in one airline's colours: shared by every plane that matches. */
 fun planeArt(typeCode: String, airlineIcao: String, title: String, airline: String) =
@@ -45,6 +45,8 @@ data class Plane(
     val track: Double?,
     val speedKmh: Int?,
     val climbMs: Double?,
+    val lat: Double = 0.0,
+    val lon: Double = 0.0,
     val model: String = "",
     val airline: String = "",
     val airlineIcao: String = "",
@@ -161,6 +163,8 @@ class Sky(
             track = o.num("track"),
             speedKmh = o.num("gs")?.let { (it * 1.852).roundToInt() },
             climbMs = (o.num("baro_rate") ?: o.num("geom_rate"))?.let { it * 0.00508 },
+            lat = lat,
+            lon = lon,
         )
     }
 
@@ -171,12 +175,16 @@ class Sky(
             lookup("https://api.adsbdb.com/v0/callsign/${p.callsign}", "flightroute")
         }
         val airline = r?.get("airline")?.let { it as? JsonObject }
+        val origin = r?.airport("origin")
+        val destination = r?.airport("destination")
+        // adsbdb files a route under the callsign, and airlines reuse callsigns: drop a route this plane is plainly not flying.
+        val plausible = origin != null && destination != null && onRoute(p.lat, p.lon, origin, destination)
         return p.copy(
             model = listOfNotNull(a?.str("manufacturer"), a?.str("type")).joinToString(" ").trim(),
             airline = airline?.str("name") ?: a?.str("registered_owner").orEmpty(),
             airlineIcao = airline?.str("icao") ?: a?.str("registered_owner_operator_flag_code").orEmpty(),
-            origin = r?.airport("origin"),
-            destination = r?.airport("destination"),
+            origin = if (plausible) origin else null,
+            destination = if (plausible) destination else null,
         )
     }
 
@@ -197,11 +205,35 @@ class Sky(
             ?.get(field)?.let { it as? JsonObject }
 
     private fun JsonObject.airport(key: String): Airport? = (get(key) as? JsonObject)?.let {
-        Airport(it.str("iata_code").ifBlank { it.str("icao_code") }, it.str("municipality").ifBlank { it.str("name") })
+        Airport(
+            it.str("iata_code").ifBlank { it.str("icao_code") },
+            it.str("municipality").ifBlank { it.str("name") },
+            it.num("latitude"),
+            it.num("longitude"),
+        )
     }
 
     companion object {
         const val POLL_MS = 10_000L
+        private const val R_KM = 6371.0
+        private const val OFF_ROUTE_KM = 300.0
+        private const val NEAR_AIRPORT_KM = 80.0
+
+        /**
+         * True when the plane is near either airport (taking off or landing) or within [OFF_ROUTE_KM]
+         * of the great circle between them; airways bend, but not from the Gulf to the Baltic.
+         */
+        fun onRoute(lat: Double, lon: Double, from: Airport, to: Airport): Boolean {
+            val (fLat, fLon) = (from.lat ?: return true) to (from.lon ?: return true)
+            val (tLat, tLon) = (to.lat ?: return true) to (to.lon ?: return true)
+            if (haversineKm(lat, lon, fLat, fLon) < NEAR_AIRPORT_KM || haversineKm(lat, lon, tLat, tLon) < NEAR_AIRPORT_KM) return true
+            val d13 = haversineKm(fLat, fLon, lat, lon) / R_KM
+            val d12 = haversineKm(fLat, fLon, tLat, tLon) / R_KM
+            val delta = Math.toRadians(bearing(fLat, fLon, lat, lon) - bearing(fLat, fLon, tLat, tLon))
+            val cross = Math.asin(sin(d13) * sin(delta))
+            val along = Math.acos((cos(d13) / cos(cross)).coerceIn(-1.0, 1.0))
+            return kotlin.math.abs(cross) * R_KM < OFF_ROUTE_KM && cos(delta) > 0 && along <= d12 + NEAR_AIRPORT_KM / R_KM
+        }
 
         private fun JsonObject.str(key: String): String = (get(key) as? JsonElement)?.let {
             runCatching { it.jsonPrimitive.contentOrNull }.getOrNull()

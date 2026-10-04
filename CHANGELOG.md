@@ -3,6 +3,10 @@
 Numeracja: `MAJOR.MINOR.PATCH` (semver). Wersja jest w `android/gradle.properties` (`ryciny.version`),
 tag w gicie to `vX.Y.Z`, a każdy tag ma release z plikiem APK.
 
+## 0.5.3 - 2026-10-04
+
+- Samoloty: trasa z adsbdb jest pokazywana tylko wtedy, gdy samolot jest przy jednym z lotnisk albo w promieniu 300 km od linii między nimi. adsbdb przypisuje trasy do numerów lotów, które linie wykorzystują ponownie, więc nad Gdańskiem pojawiało się np. „Abu Zabi → Budapeszt”.
+
 ## 0.5.2 - 2026-10-04
 
 - Przycisk „Zatrzymaj nasłuch” / „Włącz nasłuch” pod ryciną i przełącznik „Nasłuch” na górze Ustawień (wcześniej tylko z powiadomienia albo przez stuknięcie w mały napis).
