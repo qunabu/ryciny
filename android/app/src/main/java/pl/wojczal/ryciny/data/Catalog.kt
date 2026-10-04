@@ -16,6 +16,8 @@ data class Sound(
     val classes: List<Int>,
     val threshold: Float,
     val prompt: String,
+    /** How many windows within a minute must hear it before it counts; guards against one noisy window. */
+    val minHits: Int = 1,
 )
 
 @Serializable

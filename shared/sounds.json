@@ -1,5 +1,5 @@
 {
- "about": "Sounds YAMNet hears that get their own engraving. classes are YAMNet (AudioSet) indices from yamnet_class_map.csv; an event fires when any of them scores at least threshold in a 3 s window. For talking and children only the fact is kept: no audio is stored and no words are recognised.",
+ "about": "Sounds YAMNet hears that get their own engraving. classes are YAMNet (AudioSet) indices from yamnet_class_map.csv; an event fires when any of them scores at least threshold in a 3 s window. For talking and children only the fact is kept: no audio is stored and no words are recognised. minHits: how many 3 s windows within a minute must hear it before it counts (default 1), for sounds that a single noisy window fakes easily.",
  "sounds": [
   {
    "key": "mower",
@@ -135,7 +135,8 @@
     318
    ],
    "threshold": 0.35,
-   "prompt": "Subject: an ambulance van with its lights on, seen from the side, drawn like a plate in a Victorian treatise on carriages."
+   "prompt": "Subject: an ambulance van with its lights on, seen from the side, drawn like a plate in a Victorian treatise on carriages.",
+   "minHits": 2
   },
   {
    "key": "police",
@@ -145,7 +146,8 @@
     317
    ],
    "threshold": 0.35,
-   "prompt": "Subject: a police car with its lights on, seen from the side, drawn like a plate in a Victorian treatise on carriages."
+   "prompt": "Subject: a police car with its lights on, seen from the side, drawn like a plate in a Victorian treatise on carriages.",
+   "minHits": 2
   },
   {
    "key": "fire",
@@ -155,7 +157,8 @@
     319
    ],
    "threshold": 0.35,
-   "prompt": "Subject: a red fire engine with a ladder, seen from the side, drawn like a plate in a Victorian treatise on fire engines."
+   "prompt": "Subject: a red fire engine with a ladder, seen from the side, drawn like a plate in a Victorian treatise on fire engines.",
+   "minHits": 2
   },
   {
    "key": "siren",
@@ -165,7 +168,8 @@
     391
    ],
    "threshold": 0.4,
-   "prompt": "Subject: an old civil defence siren on top of a short pole, drawn like a plate in a Victorian treatise on engineering."
+   "prompt": "Subject: an old civil defence siren on top of a short pole, drawn like a plate in a Victorian treatise on engineering.",
+   "minHits": 2
   },
   {
    "key": "fireworks",
@@ -186,7 +190,8 @@
     304
    ],
    "threshold": 0.4,
-   "prompt": "Subject: a small modern car seen from the side with its indicator lights flashing, drawn like a plate in a Victorian treatise on carriages."
+   "prompt": "Subject: a small modern car seen from the side with its indicator lights flashing, drawn like a plate in a Victorian treatise on carriages.",
+   "minHits": 2
   },
   {
    "key": "cat",
@@ -316,8 +321,9 @@
    "classes": [
     132
    ],
-   "threshold": 0.6,
-   "prompt": "Subject: a gramophone with a large brass horn, drawn like a plate in a Victorian catalogue of musical instruments."
+   "threshold": 0.7,
+   "prompt": "Subject: a gramophone with a large brass horn, drawn like a plate in a Victorian catalogue of musical instruments.",
+   "minHits": 3
   },
   {
    "key": "doorbell",
@@ -375,7 +381,8 @@
     0
    ],
    "threshold": 0.6,
-   "prompt": "Subject: two neighbours chatting over a low garden fence, one leaning on a rake, drawn like a plate in a Victorian book of country life."
+   "prompt": "Subject: two neighbours chatting over a low garden fence, one leaning on a rake, drawn like a plate in a Victorian book of country life.",
+   "minHits": 2
   }
  ]
 }

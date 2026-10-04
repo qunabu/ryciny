@@ -3,6 +3,11 @@
 Numeracja: `MAJOR.MINOR.PATCH` (semver). Wersja jest w `android/gradle.properties` (`ryciny.version`),
 tag w gicie to `vX.Y.Z`, a każdy tag ma release z plikiem APK.
 
+## 0.7.1 - 2026-10-04
+
+- Mniej fałszywych dźwięków: gdy telefon sam coś odtwarza (film, wiadomość głosowa, dźwięk powiadomienia), analiza jest wstrzymana, bo mikrofon słyszał telefon i zapisywał „muzykę”, „rozmowy” czy „syreny”.
+- Muzyka liczy się dopiero po 3 trafieniach w ciągu minuty, z progiem 0,7 (było: jedno okno z progiem 0,6). Rozmowy, syreny i alarm samochodowy po 2 trafieniach. Nowe pole `minHits` w `shared/sounds.json`.
+
 ## 0.7.0 - 2026-10-04
 
 - Nowe dźwięki z rycinami: samochód (próg 0,5), zabawa dzieci (0,4) i rozmowy ludzi (0,6). Przy rozmowach i dzieciach zapisuje się tylko sam fakt: bez nagrania i bez rozpoznawania słów. Motocykl był już od 0.3.0.

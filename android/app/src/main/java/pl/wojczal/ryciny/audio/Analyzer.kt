@@ -1,6 +1,7 @@
 package pl.wojczal.ryciny.audio
 
 import android.content.Context
+import android.media.AudioManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import pl.wojczal.ryciny.data.Bark
 import pl.wojczal.ryciny.data.Place
@@ -36,8 +37,17 @@ class Analyzer(
 ) {
     private val birdNet = BirdNet(context)
     private val yamnet = Yamnet(context)
+    private val audio = context.getSystemService(AudioManager::class.java)
+    private val hits = HashMap<String, ArrayDeque<Long>>()
+
     fun analyze(window: FloatArray, at: Long) {
         val s = settings.value
+        // The phone's own playback (a video, a voice message, a notification) reaches the microphone and
+        // would be logged as music, talking or a siren: while it plays, nothing is analysed.
+        if (audio.isMusicActive) {
+            state.value = state.value.copy(level = Dsp.rms(window), sound = "telefon coś odtwarza, pomijam", at = at)
+            return
+        }
         birds(window, at, s.birdThreshold, s.rangeFilter)
 
         val audio16 = Dsp.decimate48to16(window)
@@ -51,6 +61,11 @@ class Analyzer(
         sounds.forEach { sound ->
             val score = frames.maxOf { f -> sound.classes.maxOf { f.scores[it] } }
             if (score < sound.threshold) return@forEach
+            val recent = hits.getOrPut(sound.key) { ArrayDeque() }.apply {
+                addLast(at)
+                while (first() < at - 60_000L) removeFirst()
+            }
+            if (recent.size < sound.minHits) return@forEach
             val train = if (sound.key == "train") rails.match(at) else null
             if (train == null) {
                 store.addSound(sound.key, at, score)
