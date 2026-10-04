@@ -1,5 +1,5 @@
 {
- "about": "Sounds YAMNet hears that get their own engraving. classes are YAMNet (AudioSet) indices from yamnet_class_map.csv; an event fires when any of them scores at least threshold in a 3 s window. Speech, crying and other human sounds are left out on purpose: this frame listens to nature and the street, not to the neighbours themselves.",
+ "about": "Sounds YAMNet hears that get their own engraving. classes are YAMNet (AudioSet) indices from yamnet_class_map.csv; an event fires when any of them scores at least threshold in a 3 s window. For talking and children only the fact is kept: no audio is stored and no words are recognised.",
  "sounds": [
   {
    "key": "mower",
@@ -339,6 +339,43 @@
    ],
    "threshold": 0.4,
    "prompt": "Subject: a small ice cream van seen from the side, drawn like a plate in a Victorian treatise on carriages."
+  },
+  {
+   "key": "car",
+   "now": "Samochód",
+   "past": "Przejechał samochód",
+   "classes": [
+    301,
+    308,
+    302
+   ],
+   "threshold": 0.5,
+   "prompt": "Subject: a modern small family car seen exactly from the side, drawn like a plate in a Victorian treatise on carriages."
+  },
+  {
+   "key": "children",
+   "now": "Dzieci się bawią",
+   "past": "Bawiły się dzieci",
+   "classes": [
+    66,
+    10,
+    1,
+    15
+   ],
+   "threshold": 0.4,
+   "prompt": "Subject: two children playing in a garden, one rolling a hoop and one with a ball, drawn like a plate in a Victorian children's book."
+  },
+  {
+   "key": "talking",
+   "now": "Ludzie rozmawiają",
+   "past": "Ktoś rozmawiał",
+   "classes": [
+    2,
+    63,
+    0
+   ],
+   "threshold": 0.6,
+   "prompt": "Subject: two neighbours chatting over a low garden fence, one leaning on a rake, drawn like a plate in a Victorian book of country life."
   }
  ]
 }

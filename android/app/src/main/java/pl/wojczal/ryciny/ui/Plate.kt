@@ -101,7 +101,8 @@ fun PlateScreen(g: Graph) {
         }
         // The latest stretch of each sound heard (mowing, a storm, a ship...), each its own plate.
         journal.sounds.filter { it.lastAt >= since }.groupBy { it.key }.values.map { it.maxBy { e -> e.lastAt } }.forEach { e ->
-            g.catalog.sound(e.key)?.let { add(SoundSubject(it, e, e.lastAt)) }
+            // Ordered by when it started: traffic or a long chat that keeps going does not keep jumping to the front.
+            g.catalog.sound(e.key)?.let { add(SoundSubject(it, e, e.at)) }
         }
     }.sortedByDescending { it.at }
 

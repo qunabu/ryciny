@@ -10,11 +10,12 @@ i rysuje na „papierze” XIX-wieczne ryciny tego, co się dzieje wokół domu:
   z sąsiedztwa i ich ras,
 - **pociągi**: gdy mikrofon usłyszy pociąg, aplikacja dopasowuje go do rozkładu wszystkich polskich pociągów
   (SKM Trójmiasto, PolRegio, Intercity…) i pokazuje przewoźnika, numer, skąd i dokąd jedzie,
-- **dźwięki okolicy** (31 rodzajów, YAMNet): kosiarka i piła u sąsiada, burza, deszcz, wiatr, statki i syrena
-  mgłowa z portu, dzwony kościelne, pociąg, motocykl, helikopter, karetka, policja, straż, fajerwerki, kot,
-  kogut, zwierzęta gospodarskie, żaby, świerszcze, pszczoły, muzyka, dzwonek do drzwi, lodziarz. Każdy ma własną
-  rycinę. Pełna lista z progami i promptami jest w [`shared/sounds.json`](shared/sounds.json). Mowa, płacz
-  i inne ludzkie odgłosy są celowo pominięte: ramka słucha przyrody i ulicy, nie sąsiadów.
+- **dźwięki okolicy** (34 rodzaje, YAMNet): kosiarka i piła u sąsiada, burza, deszcz, wiatr, statki i syrena
+  mgłowa z portu, dzwony kościelne, pociąg, samochód, motocykl, helikopter, karetka, policja, straż, fajerwerki,
+  kot, kogut, zwierzęta gospodarskie, żaby, świerszcze, pszczoły, muzyka, zabawa dzieci, rozmowy, dzwonek do
+  drzwi, lodziarz. Każdy ma własną rycinę. Pełna lista z progami i promptami jest w
+  [`shared/sounds.json`](shared/sounds.json). Przy rozmowach i dzieciach zapisuje się tylko sam fakt: dźwięk nie
+  jest nagrywany, a słowa nie są rozpoznawane.
 
 Na ekranie jest zawsze **jedna rycina**: najnowsza rzecz z okolicy (samolot nad głową, ostatni ptak,
 ostatni pies albo ostatni dźwięk, np. kosiarka czy burza). Dotknięcie przełącza na następną, a gdy pojawi się coś nowego, ekran wraca do niej.

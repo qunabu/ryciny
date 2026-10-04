@@ -3,6 +3,11 @@
 Numeracja: `MAJOR.MINOR.PATCH` (semver). Wersja jest w `android/gradle.properties` (`ryciny.version`),
 tag w gicie to `vX.Y.Z`, a każdy tag ma release z plikiem APK.
 
+## 0.7.0 - 2026-10-04
+
+- Nowe dźwięki z rycinami: samochód (próg 0,5), zabawa dzieci (0,4) i rozmowy ludzi (0,6). Przy rozmowach i dzieciach zapisuje się tylko sam fakt: bez nagrania i bez rozpoznawania słów. Motocykl był już od 0.3.0.
+- Rycina układa dźwięki według chwili, w której się zaczęły, więc długie zdarzenie (ruch uliczny, rozmowa) nie wypycha ciągle reszty na dalsze miejsca.
+
 ## 0.6.0 - 2026-10-04
 
 - Samoloty: rycina i Dziennik pokazują tylko te, które mikrofon usłyszał (YAMNet: silnik odrzutowy, śmigło, samolot). Pozostałe przeloty dalej zapisują się w tle, ale nie są pokazywane, więc nie generują się dla nich ryciny. Przełącznik „Pokazuj tylko samoloty, które słychać” w Ustawieniach przywraca wszystkie.
