@@ -1,4 +1,5 @@
-# Builds the APK on every pull request, and publishes a GitHub release when a vX.Y.Z tag is pushed.
+# Builds the APK on every pull request, and publishes a GitHub release when a vX.Y.Z tag is pushed
+# or when the workflow is run by hand on main (the release then creates the tag itself).
 #
 # The APK is signed with the same debug key as local builds, so a new version installs over the
 # old one without losing data. That key comes from the DEBUG_KEYSTORE_BASE64 secret:
@@ -49,7 +50,7 @@ jobs:
           DEBUG_KEYSTORE_BASE64: ${{ secrets.DEBUG_KEYSTORE_BASE64 }}
         run: |
           if [[ -z "$DEBUG_KEYSTORE_BASE64" ]]; then
-            if [[ "$GITHUB_REF_TYPE" == tag ]]; then
+            if [[ "$GITHUB_REF_TYPE" == tag || "$GITHUB_EVENT_NAME" == workflow_dispatch ]]; then
               echo "::error::Missing DEBUG_KEYSTORE_BASE64 secret (base64 of ~/.android/debug.keystore)"
               exit 1
             fi
@@ -72,7 +73,7 @@ jobs:
           path: ryciny-v${{ steps.version.outputs.version }}.apk
 
       - name: Release
-        if: github.ref_type == 'tag'
+        if: github.ref_type == 'tag' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.version.outputs.version }}
@@ -80,4 +81,4 @@ jobs:
           # The CHANGELOG section for this version, then the usual install note.
           awk -v v="$VERSION" '$0 ~ "^## " v " " {on=1; next} /^## / {on=0} on' CHANGELOG.md | sed '/./,$!d' > notes.md
           printf '\n**Instalacja:** pobierz `ryciny-v%s.apk` na telefon z Androidem 10 lub nowszym i otwórz go. Instaluje się na poprzednią wersję bez utraty danych.\n' "$VERSION" >> notes.md
-          gh release create "v$VERSION" "ryciny-v$VERSION.apk" --title "Ryciny $VERSION" --notes-file notes.md
+          gh release create "v$VERSION" "ryciny-v$VERSION.apk" --target "$GITHUB_SHA" --title "Ryciny $VERSION" --notes-file notes.md
