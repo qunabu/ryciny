@@ -26,6 +26,27 @@ Do dokupienia:
 | Karta dźwiękowa USB z wejściem mikrofonowym (np. UGREEN) | daje mikrofonowi zasilanie (plug-in power) i wpuszcza dźwięk do HA | ok. 40 zł |
 | Przedłużacz USB (opcjonalnie) | jeśli komputer z HA stoi dalej niż 4,5 m od okna: karta przy oknie, dźwięk po USB cyfrowo, bez szumu | ok. 20–40 zł |
 
+## Później: kolorowy ekran e-ink (jak w fugleramme)
+
+Ten sam panel co w Pimoroni Inky Impression (E Ink Spectra 6, 6 kolorów: czarny, biały, czerwony, zielony,
+niebieski, żółty), od Waveshare, z nakładką HAT dla Raspberry Pi. Samego Inky Impression w polskich sklepach
+nie ma; Waveshare jest w [Kamami](https://kamami.pl/szukaj?controller=search&s=spectra+6). Ceny z 5 października 2026.
+
+| Rozmiar | Model | Cena | Dostępność |
+| --- | --- | --- | --- |
+| 4" 600×400 | Waveshare 27367, z HAT | 226,69 zł | ok. 4 tygodnie |
+| **7,3" 800×480 (polecany)** | [Waveshare, z HAT](https://kamami.pl/en/e-paper-displays/1197403-7-3inch-e-ink-spectra-6-e6-full-color-e-paper-display-e-ink-display-low-power-consumption-800-4-5902186321373.html) | **385,17 zł** | ok. 4 tygodnie |
+| 13,3" 1600×1200 (jak ramka fugleramme) | Waveshare 29355, z HAT | 1 318,77 zł | od ręki |
+
+- 4" jest za mały na ramkę (drobne podpisy), 13,3" wygląda najlepiej, ale kosztuje ponad 1300 zł. 7,3" to rozsądny środek.
+- Bierz wersję **z HAT**: sam panel (np. EL073TF1 z AliExpressu) nie ma płytki sterującej i nie nałoży się na Raspberry Pi.
+  Starsza wersja 7,3" (F) w kolorach ACeP na Allegro (ok. 830 zł) jest droższa i ma bledsze kolory.
+- Waveshare to nie Pimoroni: panel ten sam, ale bez przycisków z boku i z innym sterownikiem. fugleramme obsługuje
+  tylko Inky, więc sterownik Waveshare trzeba dopisać (opis w [plan.md](../plan.md)).
+- Ekran nakłada się na Raspberry Pi. Jeśli Home Assistant działa na Raspberry Pi przy ścianie, ekran może siedzieć
+  na nim; jeśli HA stoi gdzie indziej, przy ramce potrzebne jest osobne **Raspberry Pi Zero 2 W** (ok. 80–100 zł)
+  z kartą microSD i zasilaczem, które pobiera rycinę z HA.
+
 ## Wariant bez Home Assistant: tablet jako ramka
 
 Używany tablet z Androidem i zewnętrzny mikrofon za oknem, z aplikacją nasłuchującą na tablecie. Ceny z października 2026.
