@@ -72,10 +72,24 @@ class SamsungFrame(
         .readTimeout(0, TimeUnit.SECONDS)
         .build()
 
-    /** Uploads [jpeg], shows it in Art Mode, deletes [replace] (the previous upload) and returns the new content id. */
-    suspend fun show(jpeg: ByteArray, replace: String?): String = withContext(Dispatchers.IO) {
+    /** What the TV showed before Ryciny took over, to put back with [restore]. */
+    @kotlinx.serialization.Serializable
+    data class Original(
+        val contentId: String = "",
+        val categoryId: String = "",
+        val slideshow: Map<String, String> = emptyMap(),
+        val rotation: Map<String, String> = emptyMap(),
+    )
+
+    /**
+     * Uploads [jpeg], shows it in Art Mode, deletes [replace] (the previous upload) and returns the new content id.
+     * The first time ([remember] set), it first notes the TV's own artwork, slideshow and auto-rotation and switches
+     * the latter two off, so the TV's rotation does not cover the plate; [onOriginal] gets what to restore later.
+     */
+    suspend fun show(jpeg: ByteArray, replace: String?, remember: Boolean = false, onOriginal: (Original) -> Unit = {}): String = withContext(Dispatchers.IO) {
         Session().use { s ->
             s.open()
+            if (remember) onOriginal(s.takeOver(ours = replace))
             val id = s.upload(jpeg)
             s.request("select_image", "content_id" to JsonPrimitive(id), "show" to JsonPrimitive(true))
             if (!replace.isNullOrBlank() && replace != id) {
@@ -90,7 +104,59 @@ class SamsungFrame(
         }
     }
 
+    /** Deletes the plate [ours] and puts back the TV's own artwork, slideshow and auto-rotation from [original]. */
+    suspend fun restore(original: Original?, ours: String?) = withContext(Dispatchers.IO) {
+        Session().use { s ->
+            s.open()
+            if (original != null && original.contentId.isNotBlank()) {
+                val params = buildList {
+                    add("content_id" to JsonPrimitive(original.contentId))
+                    if (original.categoryId.isNotBlank()) add("category_id" to JsonPrimitive(original.categoryId))
+                    add("show" to JsonPrimitive(true))
+                }
+                runCatching { s.request("select_image", *params.toTypedArray()) }.onFailure { Log.w(TAG, "select original", it) }
+            }
+            original?.slideshow?.takeIf { it["value"] != null }?.let { runCatching { s.setRotation("set_slideshow_status", it) } }
+            original?.rotation?.takeIf { it["value"] != null }?.let { runCatching { s.setRotation("set_auto_rotation_status", it) } }
+            if (!ours.isNullOrBlank()) {
+                runCatching {
+                    s.request("delete_image_list", "content_id_list" to kotlinx.serialization.json.buildJsonArray { addJsonObject { put("content_id", ours) } })
+                }.onFailure { Log.w(TAG, "delete ours", it) }
+            }
+        }
+    }
+
     private inner class Session : AutoCloseable {
+        /** Notes the TV's current artwork and rotation settings, then turns slideshow and auto-rotation off. */
+        suspend fun takeOver(ours: String?): Original {
+            val current = runCatching { request("get_current_artwork") }.getOrNull()
+            val currentId = current?.get("content_id")?.jsonPrimitive?.contentOrNull.orEmpty()
+            val slideshow = runCatching { request("get_slideshow_status").strings() }.getOrDefault(emptyMap())
+            val rotation = runCatching { request("get_auto_rotation_status").strings() }.getOrDefault(emptyMap())
+            val off = mapOf("value" to "off")
+            if (slideshow["value"]?.let { it != "off" } == true) runCatching { setRotation("set_slideshow_status", slideshow + off) }
+            if (rotation["value"]?.let { it != "off" } == true) runCatching { setRotation("set_auto_rotation_status", rotation + off) }
+            return Original(
+                // Our own earlier plate on screen is no original worth restoring.
+                contentId = currentId.takeIf { it != ours }.orEmpty(),
+                categoryId = current?.get("category_id")?.jsonPrimitive?.contentOrNull.orEmpty(),
+                slideshow = slideshow,
+                rotation = rotation,
+            )
+        }
+
+        suspend fun setRotation(request: String, status: Map<String, String>) {
+            request(
+                request,
+                "value" to JsonPrimitive(status["value"] ?: "off"),
+                "category_id" to JsonPrimitive(status["category_id"] ?: "MY-C0002"),
+                "type" to JsonPrimitive(status["type"] ?: "shuffleslideshow"),
+            )
+        }
+
+        private fun JsonObject.strings(): Map<String, String> =
+            listOf("value", "category_id", "type").mapNotNull { k -> this[k]?.jsonPrimitive?.contentOrNull?.let { k to it } }.toMap()
+
         private val incoming = Channel<JsonObject>(Channel.UNLIMITED)
         private var socket: WebSocket? = null
 

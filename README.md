@@ -160,7 +160,8 @@ Rycina może wisieć na telewizorze Samsung The Frame w Art Mode. Telefon wysył
 zmianie (nie częściej niż co 15 min), w 3840×2160, i usuwa poprzednią z pamięci telewizora. Ustawienia →
 „Samsung The Frame”: wpisz adres IP telewizora (najlepiej zarezerwowany w routerze), naciśnij „Wyślij teraz” i przy
 pierwszym razie zezwól pilotem na „Ryciny”. „Podgląd” pokazuje, co pójdzie na telewizor. Na telewizor idą tylko wybrane rodzaje rycin, domyślnie samoloty i ptaki,
-z priorytetem dla samolotu z ostatniej godziny. Protokół jest ten sam,
+z priorytetem dla samolotu z ostatniej godziny. Wyłączenie wysyłania przywraca to, co telewizor pokazywał wcześniej (jego sztukę, pokaz
+slajdów, rotację). Protokół jest ten sam,
 którego używają integracje Home Assistant ([samsungtvws](https://github.com/xchwarze/samsung-tv-ws-api)).
 
 ## Home Assistant

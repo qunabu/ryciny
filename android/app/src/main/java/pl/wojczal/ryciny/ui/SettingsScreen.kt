@@ -154,7 +154,11 @@ fun SettingsScreen(g: Graph) {
                 "Telewizor i telefon muszą być w tej samej sieci Wi-Fi. Przy pierwszym połączeniu telewizor zapyta, czy wpuścić „Ryciny”: zezwól pilotem.",
             style = Italic, color = InkSoft,
         )
-        Toggle("Wysyłaj rycinę na The Frame", s.frameOn) { v -> g.settings.update { it.copy(frameOn = v) } }
+        Toggle("Wysyłaj rycinę na The Frame", s.frameOn) { v ->
+            g.settings.update { it.copy(frameOn = v) }
+            // Switching off gives the TV back its own art at once.
+            if (!v && s.frameContentId.isNotBlank()) scope.launch { g.frame.restore() }
+        }
         Field("Adres IP telewizora (np. 192.168.1.50)", s.frameHost, type = KeyboardType.Uri) { v -> g.settings.update { it.copy(frameHost = v.trim(), frameToken = if (v.trim() != it.frameHost) "" else it.frameToken) } }
         Slide("Nie częściej niż co ${s.frameEveryMin} min", s.frameEveryMin.toFloat(), 1f..60f) { v -> g.settings.update { it.copy(frameEveryMin = v.roundToInt()) } }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -164,6 +168,9 @@ fun SettingsScreen(g: Graph) {
         Text("Na telewizor trafiają tylko zaznaczone ryciny. Z ostatniej godziny wygrywa samolot, potem ptak, potem pies i dźwięk.", style = Italic, color = InkSoft)
         FRAME_KINDS.forEach { (kind, label) ->
             Toggle(label, kind in s.frameKinds) { v -> g.settings.update { it.copy(frameKinds = if (v) it.frameKinds + kind else it.frameKinds - kind) } }
+        }
+        if (s.frameContentId.isNotBlank()) {
+            androidx.compose.material3.OutlinedButton(enabled = !frame.busy, onClick = { scope.launch { g.frame.restore() } }) { Text("Przywróć sztukę z telewizora") }
         }
         if (frame.status.isNotBlank()) Text(frame.status, color = if (frame.status.startsWith("błąd")) Rubric else InkSoft, style = Italic)
         if (s.frameToken.isNotBlank()) Text("Sparowano z telewizorem.", color = InkSoft)

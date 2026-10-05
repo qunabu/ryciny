@@ -12,6 +12,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import pl.wojczal.ryciny.Graph
+import pl.wojczal.ryciny.data.json
 import pl.wojczal.ryciny.ui.hhmm
 import pl.wojczal.ryciny.ui.framePick
 import pl.wojczal.ryciny.ui.plateSubjects
@@ -61,7 +62,9 @@ class FramePusher(private val g: Graph) {
             val content = subject?.content(g.catalog)
             val jpeg = withContext(Dispatchers.Default) { PlateImage.jpeg(PlateImage.render(g.context, g.art, content)) }
             val frame = SamsungFrame(s.frameHost.trim(), s.frameToken.ifBlank { null }) { token: String -> g.settings.update { it.copy(frameToken = token) } }
-            val id = frame.show(jpeg, s.frameContentId.ifBlank { null })
+            val id = frame.show(jpeg, s.frameContentId.ifBlank { null }, remember = s.frameOriginal.isBlank()) { original ->
+                g.settings.update { it.copy(frameOriginal = json.encodeToString(SamsungFrame.Original.serializer(), original)) }
+            }
             g.settings.update { it.copy(frameContentId = id) }
             lastIdentity = identity
             state.value = FrameState(status = "wysłano o ${hhmm(now)}: ${content?.title ?: "pusta rycina"} (${jpeg.size / 1024} kB)", sentAt = now)
@@ -69,6 +72,28 @@ class FramePusher(private val g: Graph) {
             state.value = state.value.copy(busy = false, status = "telewizor nie odpowiedział na czas; czy jest włączony albo w Art Mode?")
         } catch (e: Exception) {
             Log.w(TAG, "push", e)
+            state.value = state.value.copy(busy = false, status = "błąd: ${e.message ?: e.javaClass.simpleName}")
+        }
+    }
+
+    /** Takes the plate off the TV and puts back what the TV showed before (its artwork, slideshow, rotation). */
+    suspend fun restore() = lock.withLock {
+        val s = g.settings.value
+        if (s.frameHost.isBlank()) return@withLock
+        state.value = state.value.copy(busy = true, status = "przywracam sztukę z telewizora…")
+        try {
+            val original = s.frameOriginal.takeIf { it.isNotBlank() }?.let { json.decodeFromString(SamsungFrame.Original.serializer(), it) }
+            SamsungFrame(s.frameHost.trim(), s.frameToken.ifBlank { null }) { token: String -> g.settings.update { it.copy(frameToken = token) } }
+                .restore(original, s.frameContentId.ifBlank { null })
+            g.settings.update { it.copy(frameContentId = "", frameOriginal = "") }
+            lastIdentity = null
+            state.value = FrameState(
+                status = if (original?.contentId.isNullOrBlank()) "rycina usunięta; telewizor pokazuje swoją sztukę" else "przywrócono sztukę z telewizora",
+            )
+        } catch (e: TimeoutCancellationException) {
+            state.value = state.value.copy(busy = false, status = "telewizor nie odpowiedział na czas; czy jest włączony?")
+        } catch (e: Exception) {
+            Log.w(TAG, "restore", e)
             state.value = state.value.copy(busy = false, status = "błąd: ${e.message ?: e.javaClass.simpleName}")
         }
     }

@@ -48,6 +48,8 @@ data class Settings(
     val frameContentId: String = "",
     /** Which plates go to the TV, in priority order: plane, bird, dog, sound. Planes and birds by default. */
     val frameKinds: Set<String> = setOf("plane", "bird"),
+    /** The TV's own artwork and rotation from before Ryciny took over (JSON of SamsungFrame.Original), to restore. */
+    val frameOriginal: String = "",
 )
 
 class SettingsStore(dir: File, private val scope: CoroutineScope) {

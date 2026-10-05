@@ -6,6 +6,10 @@ tag w gicie to `vX.Y.Z`, a każdy tag ma release z plikiem APK.
 
 
 
+
+## 0.9.3 - 2026-10-05
+
+- The Frame: wyłączenie przełącznika „Wysyłaj rycinę na The Frame” (albo przycisk „Przywróć sztukę z telewizora”) usuwa rycinę z telewizora i przywraca to, co pokazywał wcześniej: jego dzieło, pokaz slajdów i automatyczną rotację. Aplikacja zapamiętuje ten stan przy pierwszym wysłaniu i na czas wysyłania wyłącza pokaz slajdów, żeby nie przykrywał ryciny.
 ## 0.9.2 - 2026-10-05
 
 - The Frame: gdy w ostatnich godzinach nie było samolotu ani ptaka, telewizor dostaje ostatnią taką rycinę z całego Dziennika (do 7 dni), a nie pustą kartkę „Cisza”. Sprawdzone na 55" The Frame (QE55LS03FAUXXH, 2025): parowanie, wysyłka (1,4 MB) i wyświetlenie w Art Mode w ok. 5 s.

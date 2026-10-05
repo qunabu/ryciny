@@ -31,6 +31,8 @@ class SamsungFrameTest {
     private val requests = CopyOnWriteArrayList<String>()
     private var received = ByteArray(0)
     private var deleted = ""
+    @Volatile private var selected = ""
+    @Volatile private var slideshow = "3"
 
     @After fun stop() {
         server.shutdown()
@@ -53,6 +55,26 @@ class SamsungFrameTest {
         assertArrayEquals(jpeg, received)
         assertEquals(listOf("send_image", "select_image", "delete_image_list"), requests)
         assertEquals("MY_F0001", deleted)
+    }
+
+    @Test
+    fun remembersTheTvsArtAndPutsItBack() = runBlocking {
+        val cert = HeldCertificate.Builder().addSubjectAlternativeName("localhost").build()
+        server.useHttps(HandshakeCertificates.Builder().heldCertificate(cert).build().sslSocketFactory(), false)
+        server.enqueue(MockResponse().withWebSocketUpgrade(tv()))
+        server.enqueue(MockResponse().withWebSocketUpgrade(tv()))
+        server.start()
+
+        var original: SamsungFrame.Original? = null
+        val frame = SamsungFrame("localhost", "T0KEN", server.port) {}
+        val id = frame.show(ByteArray(1000), replace = null, remember = true) { original = it }
+        assertEquals(SamsungFrame.Original("SAM-S0100", "MY-C0004", mapOf("value" to "3", "category_id" to "MY-C0004", "type" to "shuffleslideshow"), mapOf("value" to "off")), original)
+        assertEquals("off", slideshow)
+
+        frame.restore(original, id)
+        assertEquals("SAM-S0100", selected)
+        assertEquals("3", slideshow)
+        assertEquals("MY_F0002", deleted)
     }
 
     private fun tv() = object : WebSocketListener() {
@@ -87,7 +109,17 @@ class SamsungFrameTest {
                     val info = """{"ip":"127.0.0.1","port":${d2d.localPort},"key":"K3Y","secured":false}"""
                     reply(webSocket, """{"event":"ready_to_use","request_id":"$id","conn_info":${kotlinx.serialization.json.JsonPrimitive(info).toString()}}""")
                 }
-                "select_image" -> reply(webSocket, """{"event":"select_image","request_id":"$id"}""")
+                "select_image" -> {
+                    selected = data["content_id"]!!.jsonPrimitive.content
+                    reply(webSocket, """{"event":"select_image","request_id":"$id"}""")
+                }
+                "get_current_artwork" -> reply(webSocket, """{"event":"get_current_artwork","request_id":"$id","content_id":"SAM-S0100","category_id":"MY-C0004"}""")
+                "get_slideshow_status" -> reply(webSocket, """{"event":"get_slideshow_status","request_id":"$id","value":"$slideshow","category_id":"MY-C0004","type":"shuffleslideshow"}""")
+                "get_auto_rotation_status" -> reply(webSocket, """{"event":"get_auto_rotation_status","request_id":"$id","value":"off"}""")
+                "set_slideshow_status" -> {
+                    slideshow = data["value"]!!.jsonPrimitive.content
+                    reply(webSocket, """{"event":"set_slideshow_status","request_id":"$id"}""")
+                }
                 "delete_image_list" -> {
                     deleted = (data["content_id_list"]!! as kotlinx.serialization.json.JsonArray)[0].jsonObject["content_id"]!!.jsonPrimitive.content
                     reply(webSocket, """{"event":"delete_image_list","request_id":"$id","content_id_list":"[]"}""")
