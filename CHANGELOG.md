@@ -5,6 +5,10 @@ tag w gicie to `vX.Y.Z`, a każdy tag ma release z plikiem APK.
 
 
 
+
+## 0.9.2 - 2026-10-05
+
+- The Frame: gdy w ostatnich godzinach nie było samolotu ani ptaka, telewizor dostaje ostatnią taką rycinę z całego Dziennika (do 7 dni), a nie pustą kartkę „Cisza”. Sprawdzone na 55" The Frame (QE55LS03FAUXXH, 2025): parowanie, wysyłka (1,4 MB) i wyświetlenie w Art Mode w ok. 5 s.
 ## 0.9.1 - 2026-10-05
 
 - The Frame: na telewizor trafiają tylko wybrane rodzaje rycin, domyślnie samoloty i ptaki (psy i dźwięki okolicy do włączenia w Ustawieniach). Z ostatniej godziny wygrywa samolot, potem ptak, potem pies i dźwięk; gdy przez godzinę nic z nich się nie działo, zostaje najnowsza dozwolona rycina.

@@ -76,7 +76,9 @@ class FramePusher(private val g: Graph) {
     private fun current(): pl.wojczal.ryciny.ui.Subject? {
         val now = System.currentTimeMillis()
         val s = g.settings.value
-        return framePick(plateSubjects(g, g.store.value, g.sky.flow.value, s, now), s.frameKinds, now)
+        // A picture on the wall should not go blank after a quiet night: look back as far as the journal keeps (7 days).
+        val week = s.copy(lookbackHours = 7 * 24)
+        return framePick(plateSubjects(g, g.store.value, g.sky.flow.value, week, now), s.frameKinds, now)
     }
 
     companion object {
