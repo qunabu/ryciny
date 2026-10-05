@@ -40,6 +40,12 @@ data class Settings(
     val onlyHeardPlanes: Boolean = true,
     /** Per-sound switches set by the user, over the defaults in sounds.json. */
     val sounds: Map<String, Boolean> = emptyMap(),
+    /** Samsung The Frame in Art Mode: send the plate there whenever it changes. */
+    val frameOn: Boolean = false,
+    val frameHost: String = "",
+    val frameToken: String = "",
+    val frameEveryMin: Int = 15,
+    val frameContentId: String = "",
 )
 
 class SettingsStore(dir: File, private val scope: CoroutineScope) {

@@ -48,6 +48,9 @@ android {
 
     buildFeatures { compose = true }
 
+    // android.util.Log in code under JVM tests returns defaults instead of throwing.
+    testOptions { unitTests.isReturnDefaultValues = true }
+
     // TFLite models are memory-mapped straight out of the APK, which needs them stored uncompressed.
     androidResources { noCompress += "tflite" }
 }
@@ -63,7 +66,11 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
     implementation("com.google.ai.edge.litert:litert:1.4.1")
+    // WebSocket client for Samsung The Frame's local Art Mode API.
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     testImplementation("junit:junit:4.13.2")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+    testImplementation("com.squareup.okhttp3:okhttp-tls:4.12.0")
 }
 
 // style.json, dog_breeds.json and aircraft_types.json live in ../shared so the Raspberry Pi version reads the same files.

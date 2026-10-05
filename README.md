@@ -154,6 +154,14 @@ android/app/src/main/java/pl/wojczal/ryciny/
   ui/                   rycina, dziennik (z psami), ustawienia
 ```
 
+## Samsung The Frame
+
+Rycina może wisieć na telewizorze Samsung The Frame w Art Mode. Telefon wysyła ją przez sieć domową przy każdej
+zmianie (nie częściej niż co 15 min), w 3840×2160, i usuwa poprzednią z pamięci telewizora. Ustawienia →
+„Samsung The Frame”: wpisz adres IP telewizora (najlepiej zarezerwowany w routerze), naciśnij „Wyślij teraz” i przy
+pierwszym razie zezwól pilotem na „Ryciny”. „Podgląd” pokazuje, co pójdzie na telewizor. Protokół jest ten sam,
+którego używają integracje Home Assistant ([samsungtvws](https://github.com/xchwarze/samsung-tv-ws-api)).
+
 ## Home Assistant
 
 Plan przeniesienia nasłuchu na komputer z Home Assistant (HA OS), z telefonem tylko jako ekranem:

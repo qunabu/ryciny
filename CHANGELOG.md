@@ -3,6 +3,11 @@
 Numeracja: `MAJOR.MINOR.PATCH` (semver). Wersja jest w `android/gradle.properties` (`ryciny.version`),
 tag w gicie to `vX.Y.Z`, a każdy tag ma release z plikiem APK.
 
+
+## 0.9.0 - 2026-10-05
+
+- **Samsung The Frame:** rycina trafia na telewizor w Art Mode przez sieć domową, bez chmury i bez Home Assistant. Ustawienia → „Samsung The Frame”: adres IP telewizora, „Wyślij teraz”, „Podgląd”. Wysyła przy zmianie ryciny, nie częściej niż co 15 min (do ustawienia), w 3840×2160 na papierze, bez passe-partout, i kasuje poprzednią rycinę z pamięci telewizora. Przy pierwszym połączeniu telewizor pyta o zgodę (pilot).
+- Ten sam wybór ryciny dla ekranu i telewizora (`plateSubjects`); protokół Art Mode jak w `samsungtvws`, sprawdzony testem z atrapą telewizora.
 ## 0.8.0 - 2026-10-04
 
 - Ryciny można generować przez **OpenRouter**: Ustawienia → „Generowanie rycin” → OpenRouter, klucz `sk-or-…` i model (domyślnie `google/gemini-2.5-flash-image`, działa każdy model OpenRoutera generujący obrazy). Samoloty dostają proporcje 3:2, reszta 1:1.

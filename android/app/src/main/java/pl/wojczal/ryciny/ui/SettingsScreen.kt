@@ -21,9 +21,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -143,6 +145,31 @@ fun SettingsScreen(g: Graph) {
         Section("Rycina")
         Slide("Pokazuj ostatnie ${s.lookbackHours} godz.", s.lookbackHours.toFloat(), 1f..72f) { v -> g.settings.update { it.copy(lookbackHours = v.roundToInt()) } }
         Toggle("Nie wygaszaj ekranu (tryb ramki)", s.keepScreenOn) { v -> g.settings.update { it.copy(keepScreenOn = v) } }
+
+        Section("Samsung The Frame")
+        val frame by g.frame.flow.collectAsState()
+        var preview by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<androidx.compose.ui.graphics.ImageBitmap?>(null) }
+        Text(
+            "Rycina trafia na telewizor w Art Mode przez sieć domową, przy każdej zmianie, ale nie częściej niż co ${s.frameEveryMin} min. " +
+                "Telewizor i telefon muszą być w tej samej sieci Wi-Fi. Przy pierwszym połączeniu telewizor zapyta, czy wpuścić „Ryciny”: zezwól pilotem.",
+            style = Italic, color = InkSoft,
+        )
+        Toggle("Wysyłaj rycinę na The Frame", s.frameOn) { v -> g.settings.update { it.copy(frameOn = v) } }
+        Field("Adres IP telewizora (np. 192.168.1.50)", s.frameHost, type = KeyboardType.Uri) { v -> g.settings.update { it.copy(frameHost = v.trim(), frameToken = if (v.trim() != it.frameHost) "" else it.frameToken) } }
+        Slide("Nie częściej niż co ${s.frameEveryMin} min", s.frameEveryMin.toFloat(), 1f..60f) { v -> g.settings.update { it.copy(frameEveryMin = v.roundToInt()) } }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(enabled = !frame.busy, onClick = { scope.launch { g.frame.push(force = true) } }) { Text("Wyślij teraz") }
+            androidx.compose.material3.OutlinedButton(onClick = { scope.launch { preview = g.frame.preview().asImageBitmap() } }) { Text("Podgląd") }
+        }
+        if (frame.status.isNotBlank()) Text(frame.status, color = if (frame.status.startsWith("błąd")) Rubric else InkSoft, style = Italic)
+        if (s.frameToken.isNotBlank()) Text("Sparowano z telewizorem.", color = InkSoft)
+        preview?.let { img ->
+            androidx.compose.material3.AlertDialog(
+                onDismissRequest = { preview = null },
+                confirmButton = { androidx.compose.material3.TextButton(onClick = { preview = null }) { Text("Zamknij") } },
+                text = { androidx.compose.foundation.Image(img, contentDescription = "Podgląd ryciny dla telewizora", modifier = Modifier.fillMaxWidth()) },
+            )
+        }
 
         Section("Etap 2: Raspberry Pi")
         Text(

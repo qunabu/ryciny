@@ -76,6 +76,8 @@ class Graph(val context: Context) {
         }
     }
 
+    val frame = pl.wojczal.ryciny.frame.FramePusher(this)
+
     /** Loads ~80 MB of models: touch it off the main thread only. */
     val analyzer by lazy { Analyzer(context, settings, place, store, sky, live, catalog.sounds, rails) }
 }
