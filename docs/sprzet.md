@@ -43,6 +43,8 @@ nie ma; Waveshare jest w [Kamami](https://kamami.pl/szukaj?controller=search&s=s
   Starsza wersja 7,3" (F) w kolorach ACeP na Allegro (ok. 830 zł) jest droższa i ma bledsze kolory.
 - Waveshare to nie Pimoroni: panel ten sam, ale bez przycisków z boku i z innym sterownikiem. fugleramme obsługuje
   tylko Inky, więc sterownik Waveshare trzeba dopisać (opis w [plan.md](../plan.md)).
+- **Gotowa ramka bez Raspberry Pi:** Seeed reTerminal E1002 (7,3" Spectra 6 + ESP32-S3 w obudowie, bateria,
+  ESPHome) za ok. 94 USD na AliExpress. Inne możliwe urządzenia ramki i ich porównanie: [plan.md](../plan.md#urządzenie-ramki).
 - Ekran nakłada się na Raspberry Pi. Jeśli Home Assistant działa na Raspberry Pi przy ścianie, ekran może siedzieć
   na nim; jeśli HA stoi gdzie indziej, przy ramce potrzebne jest osobne **Raspberry Pi Zero 2 W** (ok. 80–100 zł)
   z kartą microSD i zasilaczem, które pobiera rycinę z HA.

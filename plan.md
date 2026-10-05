@@ -112,6 +112,58 @@ Kolorowy e-ink z panelem E Ink Spectra 6, ten sam co w Inky Impression. W Polsce
 - **Sterownik:** biblioteka Waveshare (`waveshare_epd`, model `epd7in3e` albo `epd13in3e`) zamiast Pimoroni `inky`.
   Mały interfejs `Panel.show(image)`, żeby obsłużyć oba (Inky też zadziała, gdyby kiedyś trafił się Pimoroni).
 
+## Urządzenie ramki
+
+Ramka ma jedno zadanie: pobrać gotowy obraz z dodatku w Home Assistant przez sieć lokalną i pokazać go na ekranie.
+Całe rysowanie, dithering i decyzja „czy coś się zmieniło” dzieje się w dodatku, więc ramka może być bardzo prosta.
+
+**Umowa z dodatkiem** (taka sama dla każdego urządzenia):
+
+- `GET /api/plate.png?w=800&h=480&palette=spectra6`: rycina w rozmiarze panelu, już po ditheringu do kolorów panelu,
+  gotowa do wysłania 1:1. Inne palety: `bw` (czarno-biały e-ink), `full` (zwykły ekran).
+- Nagłówek `ETag`: ramka wysyła `If-None-Match` i dostaje `304 Not Modified`, gdy nic się nie zmieniło, więc nie
+  odświeża panelu (pełne odświeżenie Spectra 6 trwa 12–28 s i miga) i nie zużywa baterii na pobieranie.
+- Adres w sieci domowej, np. `http://homeassistant.local:8099/api/plate.png`, bez logowania (tylko LAN).
+
+**Urządzenia, od najprostszego dla Home Assistant:**
+
+| Urządzenie | Ekran | Cena (X 2026) | Jak działa | Plusy | Minusy |
+| --- | --- | --- | --- | --- | --- |
+| **Seeed reTerminal E1002** | wbudowany 7,3" Spectra 6, 800×480 | ok. 94 USD na AliExpress | ESP32-S3 z firmware ESPHome: `online_image` pobiera `/api/plate.png`, `epaper_spi` wyświetla, potem głęboki sen | gotowa ramka w obudowie, bez lutowania i bez Raspberry Pi; bateria 2000 mAh na tygodnie; widoczna w HA jako urządzenie ESPHome | tylko 7,3"; obsługa Spectra 6 w ESPHome jest nowa (zgłaszane błędy, np. [#12322](https://github.com/esphome/esphome/issues/12322)) |
+| **Raspberry Pi Zero 2 W + Waveshare HAT** | 7,3" albo 13,3" Spectra 6 | Pi ok. 80–100 zł + ekran 385 / 1320 zł | Linux, mały program `frame` w Pythonie: pobiera PNG, sterownik `waveshare_epd` wysyła na panel | obsługuje każdy rozmiar, także 13,3" jak fugleramme; pełna kontrola, łatwe debugowanie | zasilanie z sieci (nie na baterii), karta microSD do przygotowania |
+| **ESP32 + płytka Waveshare e-Paper Driver Board + panel** | 7,3" Spectra 6 (sam panel) | płytka ok. 50–70 zł + panel ok. 280 zł | ESPHome jak w reTerminal, tylko złożone samemu | tanio, na baterii | składanie, obudowa do zrobienia, dla 13,3" nie polecam (mało RAM-u na 1600×1200) |
+| **Stary tablet albo telefon z Androidem** | LCD | 0 zł, jeśli leży w szufladzie | aplikacja Ryciny w trybie „tylko ekran” albo przeglądarka w trybie kiosku na stronie dodatku | od razu, kolorowo, z animacją | to nie e-ink: świeci, zużywa prąd, mniej „jak obraz” |
+| **Pimoroni Inky Frame 7,3"** | wbudowany 7,3" | ok. 400–500 zł | Raspberry Pi Pico W z MicroPythonem: pobiera PNG i wyświetla | gotowa ramka, na baterii | mniej związana z HA niż ESPHome; starszy panel 7-kolorowy w części wersji |
+| **Cokolwiek z przeglądarką** (telewizor, stary laptop, Echo Show) | dowolny | 0 zł | strona `/plate` dodatku na pełnym ekranie | zero pracy | nie e-ink |
+
+**Rekomendacja:**
+- **7,3":** Seeed reTerminal E1002. Najprostsza i najtańsza kolorowa ramka e-ink, natywnie w Home Assistant przez ESPHome,
+  bez Raspberry Pi. Zanim kupisz, sprawdź aktualny stan obsługi Spectra 6 w ESPHome (`epaper_spi`).
+- **13,3" jak fugleramme:** Raspberry Pi Zero 2 W z Waveshare 13,3" HAT. ESP32 nie uniesie wygodnie obrazu 1600×1200.
+- **Na start, zanim będzie e-ink:** stary tablet z aplikacją w trybie „tylko ekran”. Ten sam obraz, ta sama umowa.
+
+Przykład dla ESPHome (szkic, do sprawdzenia na prawdziwym urządzeniu):
+
+```yaml
+online_image:
+  - id: plate
+    url: http://homeassistant.local:8099/api/plate.png?w=800&h=480&palette=spectra6
+    format: PNG
+    type: RGB565
+    on_download_finished:
+      - component.update: epaper
+display:
+  - platform: epaper_spi
+    id: epaper
+    model: <model Spectra 6 z dokumentacji ESPHome>
+    update_interval: never
+    lambda: it.image(0, 0, id(plate));
+interval:
+  - interval: 15min
+    then:
+      - component.update: plate   # 304 z dodatku = brak odświeżania panelu
+```
+
 ## Kolejność
 
 1. **Rdzeń w Pythonie, bez HA:** BirdNET + YAMNet na pliku WAV, ten sam wynik co w aplikacji. Testy jak
@@ -123,7 +175,8 @@ Kolorowy e-ink z panelem E Ink Spectra 6, ten sam co w Inky Impression. W Polsce
    instalacja z adresu repozytorium.
 6. **Encje i zdarzenia w HA.**
 7. **Aplikacja w trybie „tylko ekran”** + import ZIP-a, żeby przenieść ryciny i nauczone psy z telefonu.
-8. **Ekran e-ink:** `/api/plate.png` z ditheringiem do 6 kolorów, program `frame` na Raspberry Pi Zero 2 W, sterownik Waveshare.
+8. **Ekran e-ink:** `/api/plate.png` z ditheringiem do 6 kolorów i `ETag`, potem jedno z urządzeń ramki
+   (reTerminal E1002 z ESPHome albo Raspberry Pi Zero 2 W z programem `frame`).
 
 Każdy krok da się sprawdzić osobno. Po kroku 4 ramka działa już w przeglądarce, bez aplikacji.
 
