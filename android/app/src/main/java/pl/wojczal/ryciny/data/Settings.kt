@@ -46,6 +46,8 @@ data class Settings(
     val frameToken: String = "",
     val frameEveryMin: Int = 15,
     val frameContentId: String = "",
+    /** Which plates go to the TV, in priority order: plane, bird, dog, sound. Planes and birds by default. */
+    val frameKinds: Set<String> = setOf("plane", "bird"),
 )
 
 class SettingsStore(dir: File, private val scope: CoroutineScope) {

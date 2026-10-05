@@ -4,6 +4,10 @@ Numeracja: `MAJOR.MINOR.PATCH` (semver). Wersja jest w `android/gradle.propertie
 tag w gicie to `vX.Y.Z`, a każdy tag ma release z plikiem APK.
 
 
+
+## 0.9.1 - 2026-10-05
+
+- The Frame: na telewizor trafiają tylko wybrane rodzaje rycin, domyślnie samoloty i ptaki (psy i dźwięki okolicy do włączenia w Ustawieniach). Z ostatniej godziny wygrywa samolot, potem ptak, potem pies i dźwięk; gdy przez godzinę nic z nich się nie działo, zostaje najnowsza dozwolona rycina.
 ## 0.9.0 - 2026-10-05
 
 - **Samsung The Frame:** rycina trafia na telewizor w Art Mode przez sieć domową, bez chmury i bez Home Assistant. Ustawienia → „Samsung The Frame”: adres IP telewizora, „Wyślij teraz”, „Podgląd”. Wysyła przy zmianie ryciny, nie częściej niż co 15 min (do ustawienia), w 3840×2160 na papierze, bez passe-partout, i kasuje poprzednią rycinę z pamięci telewizora. Przy pierwszym połączeniu telewizor pyta o zgodę (pilot).

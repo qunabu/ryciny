@@ -13,6 +13,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import pl.wojczal.ryciny.Graph
 import pl.wojczal.ryciny.ui.hhmm
+import pl.wojczal.ryciny.ui.framePick
 import pl.wojczal.ryciny.ui.plateSubjects
 
 data class FrameState(val busy: Boolean = false, val status: String = "", val sentAt: Long = 0)
@@ -72,7 +73,11 @@ class FramePusher(private val g: Graph) {
         }
     }
 
-    private fun current() = plateSubjects(g, g.store.value, g.sky.flow.value, g.settings.value, System.currentTimeMillis()).firstOrNull()
+    private fun current(): pl.wojczal.ryciny.ui.Subject? {
+        val now = System.currentTimeMillis()
+        val s = g.settings.value
+        return framePick(plateSubjects(g, g.store.value, g.sky.flow.value, s, now), s.frameKinds, now)
+    }
 
     companion object {
         private const val TAG = "FramePusher"

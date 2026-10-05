@@ -16,23 +16,30 @@ import pl.wojczal.ryciny.planes.SkyState
 internal sealed interface Subject {
     val at: Long
 
+    /** "plane", "bird", "dog" or "sound": what the TV's choice of plates filters and ranks on. */
+    val kind: String
+
     /** Stays the same while the plate shows the same thing, so a frame redraws only when it really changes. */
     val identity: String
 }
 
 internal data class PlaneSubject(val live: Plane?, val pass: PlanePass?, override val at: Long) : Subject {
+    override val kind get() = "plane"
     override val identity get() = "plane:${live?.hex ?: pass?.hex}:${pass?.at}"
 }
 
 internal data class BirdSubject(val bird: BirdHit, val count: Int, override val at: Long) : Subject {
+    override val kind get() = "bird"
     override val identity get() = "bird:${bird.sci}"
 }
 
 internal data class SoundSubject(val sound: Sound, val event: SoundEvent, override val at: Long) : Subject {
+    override val kind get() = "sound"
     override val identity get() = "sound:${sound.key}:${event.at}:${event.title}"
 }
 
 internal data class DogSubject(val dog: Dog?, val barks: List<Bark>, override val at: Long) : Subject {
+    override val kind get() = "dog"
     override val identity get() = "dog:${dog?.id ?: barks.firstOrNull()?.size}"
 }
 
@@ -66,3 +73,21 @@ internal fun plateSubjects(g: Graph, journal: Journal, sky: SkyState, settings: 
         }
     }.sortedByDescending { it.at }
 }
+
+/** The TV's kinds of plate, in priority order. */
+internal val FRAME_KINDS = listOf("plane" to "Samoloty", "bird" to "Ptaki", "dog" to "Psy", "sound" to "Dźwięki okolicy")
+
+/**
+ * The one plate for the TV: only the kinds switched on, and among what happened in the last hour the
+ * highest-priority kind wins (a plane over a bird over a dog over a sound), newest first within a kind.
+ * When nothing of those kinds happened in the hour, the newest of them, however old.
+ */
+internal fun framePick(subjects: List<Subject>, kinds: Set<String>, now: Long): Subject? {
+    val allowed = subjects.filter { it.kind in kinds }
+    val rank = FRAME_KINDS.map { it.first }
+    return allowed.filter { now - it.at < FRAME_RECENT_MS }
+        .sortedWith(compareBy<Subject> { rank.indexOf(it.kind) }.thenByDescending { it.at })
+        .firstOrNull() ?: allowed.maxByOrNull { it.at }
+}
+
+private const val FRAME_RECENT_MS = 60 * 60_000L

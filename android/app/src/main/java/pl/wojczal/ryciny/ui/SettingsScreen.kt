@@ -161,6 +161,10 @@ fun SettingsScreen(g: Graph) {
             Button(enabled = !frame.busy, onClick = { scope.launch { g.frame.push(force = true) } }) { Text("Wyślij teraz") }
             androidx.compose.material3.OutlinedButton(onClick = { scope.launch { preview = g.frame.preview().asImageBitmap() } }) { Text("Podgląd") }
         }
+        Text("Na telewizor trafiają tylko zaznaczone ryciny. Z ostatniej godziny wygrywa samolot, potem ptak, potem pies i dźwięk.", style = Italic, color = InkSoft)
+        FRAME_KINDS.forEach { (kind, label) ->
+            Toggle(label, kind in s.frameKinds) { v -> g.settings.update { it.copy(frameKinds = if (v) it.frameKinds + kind else it.frameKinds - kind) } }
+        }
         if (frame.status.isNotBlank()) Text(frame.status, color = if (frame.status.startsWith("błąd")) Rubric else InkSoft, style = Italic)
         if (s.frameToken.isNotBlank()) Text("Sparowano z telewizorem.", color = InkSoft)
         preview?.let { img ->
