@@ -62,6 +62,11 @@ Stan z 5 października 2026; żadnej z nich jeszcze nie testowaliśmy.
 | Seeed reTerminal E1002 | 7,3" Spectra 6, 800×480 | ok. 94 USD (AliExpress), ok. 127 USD ([RobotShop](https://www.robotshop.com/products/seeedstudio-reterminal-e1002-full-color-epaper-display)) | ESPHome: sama pobiera obraz z dodatku (`online_image`) | natywnie w HA jako urządzenie ESPHome, bateria 2000 mAh na tygodnie | obsługa Spectra 6 w ESPHome jest nowa (zgłaszane błędy, np. [#12322](https://github.com/esphome/esphome/issues/12322)) |
 | TRMNL z własnym, lokalnym serwerem | 7,5", tylko odcienie szarości | ok. 140 USD | lokalny serwer zgodny z API TRMNL albo webhook z HA | dojrzały ekosystem dashboardów | bez kolorów, więc nie dla rycin |
 
+Jeśli masz już **Samsung The Frame**, rycina może wisieć na nim w Art Mode, bez kupowania ramki: integracja HACS
+([ha-samsungtv-smart](https://github.com/TheFab21/ha-samsungtv-smart) albo
+[Samsung Frame Art Director](https://github.com/janstrm/Home-Assistant-Samsung-Frame-Art-Director-Integration))
+wysyła obraz lokalnie przez API telewizora. Szczegóły w [plan.md](../plan.md#urządzenie-ramki).
+
 **Co wybrać:**
 - **13,3" bez składania:** BLOOMIN8 EinkCanvas (oficjalna integracja HA) albo paperlesspaper OpenPaper L.
 - **7,3" tanio, bez składania:** Waveshare ESP32-S3 PhotoPainter albo Seeed reTerminal E1002 (ten drugi najprościej spina się z HA).

@@ -146,6 +146,15 @@ Całe rysowanie, dithering i decyzja „czy coś się zmieniło” dzieje się w
 | Seeed reTerminal E1002 | 7,3" Spectra 6 | ok. 94 USD | ESPHome (`online_image`), sama pobiera z dodatku | opisana wyżej |
 | TRMNL (z własnym, lokalnym serwerem) | 7,5", tylko odcienie szarości | ok. 140 USD | lokalny serwer zgodny z API TRMNL albo webhook z HA | dobra do tekstu i dashboardów, ale bez kolorów, więc nie dla rycin |
 
+**Samsung The Frame (Art Mode):** też działa, lokalnie, bez chmury. Integracje HACS, np.
+[ha-samsungtv-smart](https://github.com/TheFab21/ha-samsungtv-smart) albo
+[Samsung Frame Art Director](https://github.com/janstrm/Home-Assistant-Samsung-Frame-Art-Director-Integration),
+wysyłają obraz przez lokalne API telewizora (biblioteka `samsungtvws`) i ustawiają go w Art Mode. Dodatek daje wtedy
+`/api/plate.jpg?w=3840&h=2160&palette=full`: pełne kolory, 16:9, JPEG do 1,9 MB (limit telewizora), na papierze,
+bez ditheringu. Automatyzacja w HA wysyła go tylko przy zmianie ryciny (nie częściej niż co kilkanaście minut)
+i kasuje poprzednią rycinę z pamięci telewizora, żeby jej nie zapchać. Przy pierwszym parowaniu trzeba zaakceptować
+dostęp pilotem; adres IP telewizora warto zarezerwować w routerze.
+
 Wszystkie poza TRMNL biorą ten sam obraz z `/api/plate.png`. Różni się tylko to, kto inicjuje przesłanie:
 ramka pobiera sama (reTerminal, PhotoPainter z nowym firmware) albo automatyzacja w HA wypycha obraz przy zmianie ryciny
 (BLOOMIN8, paperlesspaper). Dla tej drugiej grupy dodatek wystawia zdarzenie „rycina się zmieniła”, a automatyzacja
