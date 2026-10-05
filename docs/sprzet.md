@@ -69,7 +69,10 @@ wysyła obraz lokalnie przez API telewizora. Szczegóły w [plan.md](../plan.md#
 
 **Wybrana ramka: Waveshare ESP32-S3 PhotoPainter z Kamami** (419,23 zł z akumulatorem, ok. 6 tygodni, polski sklep
 z gwarancją). Na AliExpress ta sama ramka (SpotPear) wychodzi ok. 520 zł z dostawą i bez akumulatora, więc Kamami
-jest tańsze; AliExpress jest tylko szybszy (dostawa ok. 1–3 tygodnie). Oficjalny sklep Waveshare na AliExpress ma też
+jest tańsze; AliExpress jest tylko szybszy (dostawa ok. 1–3 tygodnie). Najszybciej: [Amazon.pl](https://www.amazon.pl/dp/B0FWRHXCC3), ta sama ramka (ESP32-S3-PhotoPainter, E6) od Waveshare,
+wysyłka Amazon, **456,99 zł bez akumulatora**, darmowa dostawa w 2 dni, zwrot do 30 dni. Brak akumulatora nie przeszkadza:
+ramka, która co kilkanaście minut pobiera nową rycinę przez Wi-Fi, i tak powinna wisieć na kablu USB-C.
+Oficjalny sklep Waveshare na AliExpress ma też
 [13,3" E6 z wbudowanym ESP32-S3](https://pl.aliexpress.com/item/1005012080314699.html) za 1 428,19 zł (sam panel
 z płytką, bez ramy).
 Uwaga przy zakupie gdzie indziej: stara wersja **„PhotoPainter” bez „ESP32-S3”** (RP2040, 7-kolorowy ACeP,
