@@ -49,6 +49,37 @@ nie ma; Waveshare jest w [Kamami](https://kamami.pl/szukaj?controller=search&s=s
   na nim; jeśli HA stoi gdzie indziej, przy ramce potrzebne jest osobne **Raspberry Pi Zero 2 W** (ok. 80–100 zł)
   z kartą microSD i zasilaczem, które pobiera rycinę z HA.
 
+### Gotowe ramki e-ink, którym Home Assistant wysyła obraz przez sieć lokalną
+
+Bez składania i bez Raspberry Pi: ramka jest w obudowie, a obraz dostaje przez Wi-Fi albo Bluetooth z sieci domowej.
+Stan z 5 października 2026; żadnej z nich jeszcze nie testowaliśmy.
+
+| Ramka | Ekran | Cena | Jak dostaje obraz z Home Assistant | Plusy | Minusy |
+| --- | --- | --- | --- | --- | --- |
+| [BLOOMIN8 EinkCanvas](https://bloomin8.com/products/bloomin8-eink-canvas) | 13,3" Spectra 6, 150 PPI | ok. 499 USD (wersja 28,5" ok. 2399 USD) | oficjalna integracja z HA i lokalne REST API; automatyzacja wysyła obraz | najbliżej „po prostu ramki”, 13,3" jak fugleramme, bateria na długo, karta SD, działa bez chmury | drogo; integrację z HA znamy tylko z opisu producenta |
+| [paperlesspaper OpenPaper L](https://linuxiac.com/openpaper-l-launches-as-a-13-3-inch-open-source-color-e-ink-frame/) | 13,3" kolor | do sprawdzenia | opcjonalny firmware offline: obraz przez Bluetooth albo z lokalnego URL-a; [integracja HA](https://github.com/djiwondee/paperlesspaper-ha) z akcją `upload_image` | otwarty projekt (Niemcy, UE), otwarte API | ceny i dostępności nie sprawdziliśmy |
+| [Waveshare ESP32-S3 PhotoPainter](https://www.waveshare.com/wiki/ESP32-S3-PhotoPainter) | 7,3" Spectra 6, 800×480, drewniana rama | ok. 60–90 USD ([AliExpress](https://www.aliexpress.com/item/1005010194325425.html)) | fabrycznie strona WWW na ramce i upload przez Wi-Fi (obraz musi być gotową, zditherowaną BMP); z [firmware społeczności](https://hackaday.io/project/205124-esp32-wifi-e-ink-photo-frame) sama pobiera obraz z URL-a | najtańsza gotowa kolorowa ramka, bateria, Wi-Fi i Bluetooth | fabryczny firmware jest prymitywny, wygodnie dopiero po wgraniu innego |
+| Seeed reTerminal E1002 | 7,3" Spectra 6, 800×480 | ok. 94 USD (AliExpress), ok. 127 USD ([RobotShop](https://www.robotshop.com/products/seeedstudio-reterminal-e1002-full-color-epaper-display)) | ESPHome: sama pobiera obraz z dodatku (`online_image`) | natywnie w HA jako urządzenie ESPHome, bateria 2000 mAh na tygodnie | obsługa Spectra 6 w ESPHome jest nowa (zgłaszane błędy, np. [#12322](https://github.com/esphome/esphome/issues/12322)) |
+| TRMNL z własnym, lokalnym serwerem | 7,5", tylko odcienie szarości | ok. 140 USD | lokalny serwer zgodny z API TRMNL albo webhook z HA | dojrzały ekosystem dashboardów | bez kolorów, więc nie dla rycin |
+
+**Co wybrać:**
+- **13,3" bez składania:** BLOOMIN8 EinkCanvas (oficjalna integracja HA) albo paperlesspaper OpenPaper L.
+- **7,3" tanio, bez składania:** Waveshare ESP32-S3 PhotoPainter albo Seeed reTerminal E1002 (ten drugi najprościej spina się z HA).
+- **13,3" najtaniej, z własnym składaniem:** Waveshare 13,3" z HAT (tabela wyżej) + Raspberry Pi Zero 2 W.
+
+Wszystkie kolorowe ramki pokażą ten sam obraz z dodatku (`/api/plate.png`, już w 6 kolorach panelu). Różni się tylko to,
+kto zaczyna przesłanie: ramka pobiera sama (reTerminal, PhotoPainter z nowym firmware) albo automatyzacja w HA
+wypycha obraz przy zmianie ryciny (BLOOMIN8, paperlesspaper). Szczegóły: [plan.md](../plan.md#urządzenie-ramki).
+
+### Urządzenie przy ekranie, gdy kupujesz sam panel z HAT
+
+| Urządzenie | Cena | Uwagi |
+| --- | --- | --- |
+| Raspberry Pi Zero 2 W + karta microSD + zasilacz | ok. 80–100 zł + ok. 40 zł | domyślne; obsługuje każdy rozmiar, także 13,3"; program `frame` pobiera obraz z HA |
+| Raspberry Pi, na którym działa sam Home Assistant | 0 zł | tylko jeśli HA stoi przy ramce; ekran obsługuje wtedy dodatek |
+| ESP32 + Waveshare e-Paper Driver Board (do samego panelu, bez HAT) | ok. 50–70 zł | ESPHome jak w reTerminal; tylko do 7,3" (za mało RAM-u na 1600×1200) |
+| Stary tablet albo telefon z Androidem | 0 zł | nie e-ink, ale pokaże tę samą rycinę w aplikacji (tryb „tylko ekran”) albo w przeglądarce |
+
 ## Wariant bez Home Assistant: tablet jako ramka
 
 Używany tablet z Androidem i zewnętrzny mikrofon za oknem, z aplikacją nasłuchującą na tablecie. Ceny z października 2026.
