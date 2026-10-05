@@ -74,7 +74,9 @@ jest tańsze; AliExpress jest tylko szybszy (dostawa ok. 1–3 tygodnie). Oficja
 z płytką, bez ramy).
 Uwaga przy zakupie gdzie indziej: stara wersja **„PhotoPainter” bez „ESP32-S3”** (RP2040, 7-kolorowy ACeP,
 np. na Alibabie za ok. 240–280 zł) bierze obrazy **tylko z karty SD**, bez Wi-Fi, więc ani telefon, ani Home Assistant
-nic do niej nie wyślą. Szukaj w tytule „ESP32-S3-PhotoPainter” i „E6” albo „Spectra 6”.
+nic do niej nie wyślą. To samo dotyczy **PhotoPainter (B)** (Waveshare 30068, w Kamami 444,41 zł, od ręki): ma już
+ładny ekran E6, ale procesor RP2350 bez Wi-Fi i obrazy tylko z karty microSD. Szukaj w tytule „ESP32-S3-PhotoPainter”
+(Waveshare 32408) i „E6” albo „Spectra 6”.
 Wysyłkę ryciny z aplikacji (przygotowanie BMP w 6 kolorach panelu i upload przez Wi-Fi) dopiszemy, gdy ramka przyjdzie.
 
 **Co wybrać:**
