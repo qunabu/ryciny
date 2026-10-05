@@ -136,8 +136,25 @@ Całe rysowanie, dithering i decyzja „czy coś się zmieniło” dzieje się w
 | **Pimoroni Inky Frame 7,3"** | wbudowany 7,3" | ok. 400–500 zł | Raspberry Pi Pico W z MicroPythonem: pobiera PNG i wyświetla | gotowa ramka, na baterii | mniej związana z HA niż ESPHome; starszy panel 7-kolorowy w części wersji |
 | **Cokolwiek z przeglądarką** (telewizor, stary laptop, Echo Show) | dowolny | 0 zł | strona `/plate` dodatku na pełnym ekranie | zero pracy | nie e-ink |
 
+**Gotowe ramki, którym Home Assistant wysyła obraz przez sieć lokalną (bez składania):**
+
+| Ramka | Ekran | Cena | Jak dostaje obraz | Uwagi |
+| --- | --- | --- | --- | --- |
+| [BLOOMIN8 EinkCanvas](https://bloomin8.com/products/bloomin8-eink-canvas) | 13,3" Spectra 6 | ok. 499 USD | oficjalna integracja z HA i lokalne REST API; dodatek wysyła `/api/plate.png` automatyzacją | najbliżej „po prostu ramki”; bateria, karta SD; drogo, ale 13,3" jak fugleramme |
+| [paperlesspaper OpenPaper L](https://linuxiac.com/openpaper-l-launches-as-a-13-3-inch-open-source-color-e-ink-frame/) | 13,3" kolor | sprawdzić | opcjonalny firmware offline: obraz przez Bluetooth albo z lokalnego URL-a; [integracja HA](https://github.com/djiwondee/paperlesspaper-ha) z akcją `upload_image` | otwarty projekt z Niemiec, otwarte API |
+| [Waveshare ESP32-S3 PhotoPainter](https://www.waveshare.com/wiki/ESP32-S3-PhotoPainter) | 7,3" Spectra 6 | ok. 60–90 USD | fabrycznie: strona WWW na ramce, upload przez Wi-Fi (gotowa, zditherowana BMP); z firmware społeczności: sama pobiera obraz z URL-a | tania gotowa ramka w drewnianej oprawie; przyda się `palette=spectra6` i format BMP z dodatku |
+| Seeed reTerminal E1002 | 7,3" Spectra 6 | ok. 94 USD | ESPHome (`online_image`), sama pobiera z dodatku | opisana wyżej |
+| TRMNL (z własnym, lokalnym serwerem) | 7,5", tylko odcienie szarości | ok. 140 USD | lokalny serwer zgodny z API TRMNL albo webhook z HA | dobra do tekstu i dashboardów, ale bez kolorów, więc nie dla rycin |
+
+Wszystkie poza TRMNL biorą ten sam obraz z `/api/plate.png`. Różni się tylko to, kto inicjuje przesłanie:
+ramka pobiera sama (reTerminal, PhotoPainter z nowym firmware) albo automatyzacja w HA wypycha obraz przy zmianie ryciny
+(BLOOMIN8, paperlesspaper). Dla tej drugiej grupy dodatek wystawia zdarzenie „rycina się zmieniła”, a automatyzacja
+wywołuje akcję integracji z adresem obrazu.
+
 **Rekomendacja:**
-- **7,3":** Seeed reTerminal E1002. Najprostsza i najtańsza kolorowa ramka e-ink, natywnie w Home Assistant przez ESPHome,
+- **13,3" bez składania:** BLOOMIN8 EinkCanvas (oficjalna integracja HA) albo paperlesspaper OpenPaper L.
+- **7,3" tanio, bez składania:** Waveshare ESP32-S3 PhotoPainter albo Seeed reTerminal E1002.
+- **7,3" najbliżej HA:** Seeed reTerminal E1002. Najprostsza i najtańsza kolorowa ramka e-ink, natywnie w Home Assistant przez ESPHome,
   bez Raspberry Pi. Zanim kupisz, sprawdź aktualny stan obsługi Spectra 6 w ESPHome (`epaper_spi`).
 - **13,3" jak fugleramme:** Raspberry Pi Zero 2 W z Waveshare 13,3" HAT. ESP32 nie uniesie wygodnie obrazu 1600×1200.
 - **Na start, zanim będzie e-ink:** stary tablet z aplikacją w trybie „tylko ekran”. Ten sam obraz, ta sama umowa.
