@@ -6,6 +6,8 @@ jako XIX-wieczną rycinę. Aplikacja Ryciny na Androida może wtedy tylko wyświ
 
 ## Instalacja
 
+Pełna instrukcja krok po kroku: [INSTALL.md](https://github.com/qunabu/ryciny/blob/main/INSTALL.md).
+
 1. Ustawienia → Dodatki → Sklep z dodatkami → ⋮ → Repozytoria → dodaj `https://github.com/qunabu/ryciny`.
 2. Zainstaluj „Ryciny” (pierwsza instalacja buduje obraz na miejscu, na Raspberry Pi kilka minut).
 3. Konfiguracja: klucz do generowania rycin (OpenAI, Gemini albo OpenRouter; bez klucza ryciny ptaków i tak są).

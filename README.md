@@ -61,10 +61,13 @@ Zamówiony: mikrofon Primo EM272Z1 z przedłużaczem 4,5 m, który trafi do komp
 ([plan.md](plan.md)). Wariant bez HA: używany Samsung Galaxy Tab A7 z OLX jako ramka.
 Szczegóły, ceny i montaż: [docs/sprzet.md](docs/sprzet.md).
 
-## Instalacja na telefonie
+## Instalacja
 
-Pobierz `ryciny-vX.Y.Z.apk` z [ostatniego wydania](../../releases/latest), prześlij go na telefon i otwórz.
-Trzeba zezwolić na instalację z nieznanych źródeł. APK jest podpisany kluczem testowym (debug).
+Krok po kroku, dla samego telefonu i dla Home Assistant (dodatek, mikrofon, panel, dashboard, telefon jako ekran,
+Samsung The Frame), z rozwiązywaniem problemów: **[INSTALL.md](INSTALL.md)**.
+
+Skrót: APK z [ostatniego wydania](https://github.com/qunabu/ryciny/releases/latest) na telefon; dodatek do HA
+z repozytorium `https://github.com/qunabu/ryciny` (Ustawienia → Dodatki → Sklep → Repozytoria).
 
 Ze źródeł:
 
@@ -73,9 +76,6 @@ cd android
 ./gradlew assembleRelease      # wymaga JDK 17 i Android SDK (compileSdk 37)
 adb install -r app/build/outputs/apk/release/app-release.apk
 ```
-
-Po starcie aplikacja prosi o mikrofon, lokalizację i powiadomienia. Nasłuch działa jako usługa w tle
-z powiadomieniem „Ryciny nasłuchują” (stamtąd można go zatrzymać). Dźwięk nigdy nie opuszcza telefonu.
 
 ## Klucz do generowania rycin
 
