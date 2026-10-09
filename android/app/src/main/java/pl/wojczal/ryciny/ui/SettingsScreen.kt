@@ -57,6 +57,32 @@ fun SettingsScreen(g: Graph) {
             if (on) pl.wojczal.ryciny.audio.ListenService.start(context) else pl.wojczal.ryciny.audio.ListenService.stop(context)
         }
 
+        Section("Źródło danych")
+        val remote by g.remote.flow.collectAsState()
+        var check by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("") }
+        Text(
+            "Ten telefon słucha sam (jak dotąd) albo pokazuje to, co słyszy dodatek Ryciny w Home Assistant. " +
+                "W trybie Home Assistant mikrofon telefonu jest wyłączony, a Dziennik, psy i ryciny są na serwerze.",
+            style = Italic, color = InkSoft,
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            listOf("phone" to "Ten telefon", "server" to "Home Assistant").forEach { (k, label) ->
+                FilterChip(selected = s.source == k, onClick = {
+                    g.settings.update { it.copy(source = k) }
+                    if (k == "server") pl.wojczal.ryciny.audio.ListenService.stop(context)
+                    else if (s.listen) pl.wojczal.ryciny.audio.ListenService.start(context)
+                }, label = { Text(label) })
+            }
+        }
+        if (s.source == "server") {
+            Field("Adres dodatku (np. http://homeassistant.local:8099)", s.serverUrl, type = KeyboardType.Uri) { v -> g.settings.update { it.copy(serverUrl = v.trim()) } }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(onClick = { scope.launch { check = g.remote.check() } }) { Text("Sprawdź połączenie") }
+                androidx.compose.material3.OutlinedButton(onClick = { scope.launch { check = g.remote.importLocal(g.store.localFile) } }) { Text("Wyślij psy z telefonu") }
+            }
+            Text(check.ifBlank { remote.status }, color = if (remote.ok || check.startsWith("połączono") || check.startsWith("wysłano")) InkSoft else Rubric, style = Italic)
+        }
+
         Section("Generowanie rycin (samoloty, psy)")
         Text(
             "Claude i ElevenLabs nie generują obrazów — potrzebny jest klucz OpenAI, Google Gemini albo OpenRouter. " +

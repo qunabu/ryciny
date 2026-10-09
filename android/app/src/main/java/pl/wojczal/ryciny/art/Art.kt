@@ -64,8 +64,15 @@ class Art(private val context: Context, private val settings: SettingsStore, pri
 
     fun cached(req: ArtRequest): File? = candidates(req).firstOrNull { it.exists() }
 
+    var server: pl.wojczal.ryciny.data.Remote? = null
+
     suspend fun load(req: ArtRequest): File? {
         cached(req)?.let { return it }
+        server?.takeIf { it.active }?.let { remote ->
+            // Home Assistant mode: the add-on fetches or draws it (once), the phone keeps a copy.
+            return runCatching { remote.art(root, req.kind.name, req.key, req.subject, req.airline, req.prompt) }.getOrNull()
+                ?.also { _version.update { v -> v + 1 } }
+        }
         if (req.kind == Kind.BIRD) {
             fugleramme(req)?.let { return it }
             if (req.key !in noPlate) return null // offline: wait for the real plate rather than generate one

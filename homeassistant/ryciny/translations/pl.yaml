@@ -1,0 +1,36 @@
+configuration:
+  lat:
+    name: Szerokość geograficzna
+    description: Pusta = lokalizacja z Home Assistant. Do filtra gatunków ptaków, samolotów i pociągów.
+  lon:
+    name: Długość geograficzna
+    description: Pusta = lokalizacja z Home Assistant.
+  image_provider:
+    name: Generowanie rycin
+    description: Kto rysuje ryciny samolotów, psów i dźwięków (ptaki mają gotowe tablice z fugleramme).
+  openai_key:
+    name: Klucz OpenAI
+  gemini_key:
+    name: Klucz Google Gemini
+  openrouter_key:
+    name: Klucz OpenRouter
+  bird_threshold:
+    name: Minimalna pewność BirdNET
+  range_filter:
+    name: Tylko gatunki występujące tu o tej porze roku
+  bark_threshold:
+    name: Próg szczekania
+  dog_match:
+    name: Dopasowanie do znanego psa
+  radius_km:
+    name: Promień samolotów (km)
+  overhead_max_alt_m:
+    name: „Nad głową” poniżej (m)
+  trains:
+    name: Rozpoznawaj pociągi z rozkładu (30 MB raz na 3 dni)
+  sounds_off:
+    name: Wyłączone dźwięki
+    description: Klucze z shared/sounds.json, np. sheep, goat, music.
+  audio_command:
+    name: Polecenie nagrywania
+    description: Domyślnie parec z mikrofonu Home Assistant (48 kHz, mono, float32).

@@ -50,6 +50,9 @@ data class Settings(
     val frameKinds: Set<String> = setOf("plane", "bird"),
     /** The TV's own artwork and rotation from before Ryciny took over (JSON of SamsungFrame.Original), to restore. */
     val frameOriginal: String = "",
+    /** Where the journal comes from: "phone" (this phone listens, as always) or "server" (the Home Assistant add-on). */
+    val source: String = "phone",
+    val serverUrl: String = "",
 )
 
 class SettingsStore(dir: File, private val scope: CoroutineScope) {

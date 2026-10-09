@@ -4,7 +4,9 @@ Cel: mikrofon wpięty do komputera z Home Assistant zbiera dźwięki 24/7, a tel
 ekran e-ink tylko wyświetla ryciny. Wszystko, co dziś robi aplikacja na Androida (ptaki, psy, 34 dźwięki,
 samoloty, pociągi, generowanie rycin), przenosi się do jednego dodatku HA. Aplikacja dostaje tryb „tylko ekran”.
 
-Plan czeka na mikrofon. Nic z niego nie jest jeszcze zbudowane.
+**Stan (0.10.0):** zrobione kroki 1–5 i 7: dodatek (nasłuch, rozpoznawanie, samoloty, pociągi, ryciny, Dziennik,
+API, panel w HA, `/api/plate.png`) oraz tryb „Home Assistant” w aplikacji. Zostało: encje i zdarzenia w HA (krok 6)
+i obsługa ramek e-ink (krok 8). Na prawdziwym HA OS z mikrofonem jeszcze nie testowane (czeka na mikrofon).
 
 ## Sprzęt
 

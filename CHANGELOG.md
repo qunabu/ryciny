@@ -7,6 +7,13 @@ tag w gicie to `vX.Y.Z`, a każdy tag ma release z plikiem APK.
 
 
 
+
+## 0.10.0 - 2026-10-09
+
+- **Dodatek do Home Assistant** (`homeassistant/ryciny`, repozytorium dodatków pod adresem tego repo): nasłuch z mikrofonu przy komputerze z HA, BirdNET, YAMNet (psy, 34 dźwięki), samoloty, pociągi, generowanie rycin i Dziennik w tym samym formacie co aplikacja. Lokalizacja domu z Home Assistant.
+- **Panel „Ryciny” w HA:** rycina, Dziennik z miniaturami, odsłuch szczekania i oznaczanie psów, Ustawienia zmieniane na żywo. Rycina jako obraz `/api/plate.png` do kamery na dashboardzie (także w 6 kolorach dla e-ink).
+- **Aplikacja: Źródło danych → Home Assistant.** Telefon nie słucha, tylko pokazuje Dziennik, ryciny i samoloty z dodatku; psy oznaczane w telefonie trafiają na serwer; „Wyślij psy z telefonu” przenosi nauczone psy. Domyślnie („Ten telefon”) wszystko działa jak dotąd, a Dziennik telefonu zostaje nietknięty.
+- The Frame działa w obu trybach.
 ## 0.9.3 - 2026-10-05
 
 - The Frame: wyłączenie przełącznika „Wysyłaj rycinę na The Frame” (albo przycisk „Przywróć sztukę z telewizora”) usuwa rycinę z telewizora i przywraca to, co pokazywał wcześniej: jego dzieło, pokaz slajdów i automatyczną rotację. Aplikacja zapamiętuje ten stan przy pierwszym wysłaniu i na czas wysyłania wyłącza pokaz slajdów, żeby nie przykrywał ryciny.

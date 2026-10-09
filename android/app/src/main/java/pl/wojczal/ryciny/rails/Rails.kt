@@ -98,6 +98,7 @@ class Rails(private val context: Context, private val settings: SettingsStore, p
 
     suspend fun ensureToday(force: Boolean = false) = lock.withLock {
         if (!settings.value.trains) { Log.i(TAG, "trains off"); return@withLock }
+        if (settings.value.source == "server") return@withLock // the add-on matches trains itself
         if (!place.resolved.value) { Log.i(TAG, "waiting for a location"); return@withLock }
         val today = LocalDate.now(ZONE)
         val key = today.format(DateTimeFormatter.BASIC_ISO_DATE)

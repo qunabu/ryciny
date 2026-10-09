@@ -108,9 +108,27 @@ class Store(private val dir: File, scope: CoroutineScope) {
     val flow: StateFlow<Journal> = state
     val value: Journal get() = state.value
 
+    /** Showing the Home Assistant add-on's journal: nothing is saved over the phone's own, writes go to the add-on. */
+    @Volatile
+    var remote: Boolean = false
+        private set
+    var server: Remote? = null
+    val localFile: File get() = file
+
+    fun showRemote(journal: Journal) {
+        remote = true
+        state.value = journal
+    }
+
+    fun showLocal() {
+        remote = false
+        state.value = load()
+    }
+
     init {
         scope.launch(Dispatchers.IO) {
             state.drop(1).debounce(3_000).collect { journal ->
+                if (remote) return@collect
                 val tmp = File(dir, "journal.json.tmp")
                 tmp.writeText(json.encodeToString(Journal.serializer(), journal))
                 tmp.renameTo(file)
@@ -154,7 +172,12 @@ class Store(private val dir: File, scope: CoroutineScope) {
     }
 
     /** Tags a bark episode as [dogId]'s; its embedding becomes one more sample of that dog. */
-    fun tagBark(barkId: String, dogId: String) = state.update { j ->
+    fun tagBark(barkId: String, dogId: String) {
+        if (remote) server?.tagBark(barkId, dogId)
+        tagBarkHere(barkId, dogId)
+    }
+
+    private fun tagBarkHere(barkId: String, dogId: String) = state.update { j ->
         val bark = j.barks.firstOrNull { it.id == barkId } ?: return@update j
         j.copy(
             barks = j.barks.map { if (it.id == barkId) it.copy(dogId = dogId, similarity = 1f) else it },
@@ -164,15 +187,26 @@ class Store(private val dir: File, scope: CoroutineScope) {
 
     fun newDog(name: String, breed: String, breedEn: String): String {
         val id = UUID.randomUUID().toString().take(8)
+        if (remote) server?.newDog(id, name, breed, breedEn)
         state.update { it.copy(dogs = it.dogs + Dog(id, name, breed, breedEn)) }
         return id
     }
 
-    fun editDog(id: String, name: String, breed: String, breedEn: String) = state.update { j ->
+    fun editDog(id: String, name: String, breed: String, breedEn: String) {
+        if (remote) server?.editDog(id, name, breed, breedEn)
+        editDogHere(id, name, breed, breedEn)
+    }
+
+    private fun editDogHere(id: String, name: String, breed: String, breedEn: String) = state.update { j ->
         j.copy(dogs = j.dogs.map { if (it.id == id) it.copy(name = name, breed = breed, breedEn = breedEn) else it })
     }
 
-    fun deleteDog(id: String) = state.update { j ->
+    fun deleteDog(id: String) {
+        if (remote) server?.deleteDog(id)
+        deleteDogHere(id)
+    }
+
+    private fun deleteDogHere(id: String) = state.update { j ->
         j.copy(
             dogs = j.dogs.filterNot { it.id == id },
             barks = j.barks.map { if (it.dogId == id) it.copy(dogId = null, similarity = 0f) else it },

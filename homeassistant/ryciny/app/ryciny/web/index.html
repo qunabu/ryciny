@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ryciny</title>
+<style>
+@font-face{font-family:Garamond;src:url(fonts/garamond.ttf)}
+@font-face{font-family:Garamond;font-style:italic;src:url(fonts/garamond_italic.ttf)}
+:root{--paper:#f3ead7;--paper2:#e6d9bc;--ink:#2b2118;--soft:#6b5b4a;--rubric:#9c3b2a}
+*{box-sizing:border-box}
+input{accent-color:var(--rubric)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Garamond,Georgia,serif;font-size:18px}
+nav{display:flex;gap:4px;justify-content:center;background:var(--paper2);position:sticky;top:0;z-index:2}
+nav button{font:inherit;background:none;border:0;padding:12px 18px;color:var(--soft);cursor:pointer}
+nav button.on{color:var(--ink);border-bottom:2px solid var(--rubric)}
+main{max-width:1000px;margin:0 auto;padding:16px}
+.frame{border:1px solid rgba(43,33,24,.45);outline:1px solid rgba(43,33,24,.25);outline-offset:-6px;padding:18px;background:var(--paper)}
+.plate img{width:100%;height:auto;display:block}
+.soft{color:var(--soft);font-style:italic}
+.live{text-align:center;margin:12px 0;color:var(--rubric);font-style:italic}
+h2{font-weight:normal;color:var(--rubric);margin:22px 0 8px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 14px}
+.chips button{font:inherit;font-size:16px;border:1px solid var(--soft);background:none;border-radius:16px;padding:3px 12px;cursor:pointer;color:var(--ink)}
+.chips button.on{background:var(--paper2)}
+.row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(107,91,74,.2)}
+.row .t{flex:1}
+.row .d{color:var(--soft);font-style:italic;font-size:15px}
+.thumb{width:64px;height:64px;object-fit:contain;flex:none}
+.thumb.empty{border:1px solid rgba(107,91,74,.3);transform:scale(.6)}
+div.thumb{display:block}
+button.act{font:inherit;font-size:16px;color:var(--rubric);background:none;border:0;cursor:pointer}
+label.set{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:6px 0}
+input[type=range]{width:50%}
+input,select{font:inherit}
+.tag{background:var(--paper2);padding:10px;margin:6px 0 10px 76px}
+code{font-size:14px}
+</style>
+</head>
+<body>
+<nav>
+  <button data-tab="plate" class="on">Rycina</button>
+  <button data-tab="journal">Dziennik</button>
+  <button data-tab="settings">Ustawienia</button>
+</nav>
+<main>
+  <section id="plate">
+    <div class="frame plate"><img id="plateImg" alt="Rycina"></div>
+    <div class="live" id="live"></div>
+  </section>
+  <section id="journal" hidden>
+    <div class="chips" id="filters"></div>
+    <div id="dogs"></div>
+    <div id="entries"></div>
+  </section>
+  <section id="settings" hidden></section>
+</main>
+<script>
+const $ = s => document.querySelector(s);
+const api = (p, o) => fetch(p, o).then(r => r.ok ? r.json() : Promise.reject(r.status));
+const hhmm = t => new Date(t).toLocaleTimeString('pl-PL', {hour: '2-digit', minute: '2-digit'});
+const day = t => new Date(t).toLocaleDateString('pl-PL', {day: 'numeric', month: 'short'});
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+let journal = null, sounds = {}, breeds = [], filter = 'all', version = -1;
+
+function show(tab) {
+  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x.dataset.tab === tab));
+  document.querySelectorAll('main section').forEach(s => s.hidden = s.id !== tab);
+  if (tab === 'settings') renderSettings();
+  history.replaceState(null, '', '#' + tab);
+}
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => show(b.dataset.tab));
+
+async function tick() {
+  try {
+    const l = await api('api/live');
+    $('#live').textContent = (l.live.listening ? '● nasłuch trwa' : '○ nasłuch wyłączony') +
+      (l.live.sound ? ' · słychać: ' + l.live.sound : '') + (l.live.error ? ' · ' + l.live.error : '') +
+      (l.artError ? ' · ' + l.artError : '');
+    if (l.version !== version) {
+      version = l.version;
+      $('#plateImg').src = 'api/plate.png?w=1600&h=900&v=' + version;
+      journal = await api('api/journal');
+      renderJournal();
+    }
+  } catch (e) { $('#live').textContent = 'brak połączenia z dodatkiem'; }
+}
+
+function art(kind, key, subject, extra = '') {
+  const cached = kind === 'BIRD' ? '' : '&cached=1';
+  return `<img class="thumb" loading="lazy" src="api/art?kind=${kind}&key=${encodeURIComponent(key)}&subject=${encodeURIComponent(subject)}${extra}${cached}" onerror="const d=document.createElement('div');d.className='thumb empty';this.replaceWith(d)">`;
+}
+
+function renderJournal() {
+  if (!journal) return;
+  const f = [['all', 'wszystko'], ['birds', 'ptaki'], ['dogs', 'psy'], ['planes', 'samoloty'], ['sounds', 'dźwięki']];
+  $('#filters').innerHTML = f.map(([k, l]) => `<button class="${k === filter ? 'on' : ''}" data-f="${k}">${l}</button>`).join('');
+  $('#filters').querySelectorAll('button').forEach(b => b.onclick = () => { filter = b.dataset.f; renderJournal(); });
+  const dogs = Object.fromEntries(journal.dogs.map(d => [d.id, d]));
+  const rows = [];
+  if (filter === 'all' || filter === 'birds') journal.birds.forEach(b => rows.push({at: b.lastAt, html:
+    `<div class="row">${art('BIRD', b.sci, b.sci)}<div class="t">${esc(b.name.charAt(0).toUpperCase() + b.name.slice(1))}<div class="d">${day(b.lastAt)} ${hhmm(b.lastAt)} · ${esc(b.sci)} · ${Math.round(b.conf * 100)}%${b.count > 1 ? ' · ' + b.count + '×' : ''}</div></div></div>`}));
+  if (filter === 'all' || filter === 'dogs') journal.barks.forEach(b => {
+    const d = dogs[b.dogId];
+    const breed = d ? [d.breed, d.breedEn] : mongrel(b.size);
+    rows.push({at: b.lastAt, html:
+      `<div class="row">${art('DOG', breed[0], breed[1])}<div class="t">${d ? esc(d.name + ' (' + d.breed + ')') : 'Szczekanie: nieznany pies' + (b.size !== '?' ? ', raczej ' + b.size : '')}<div class="d">${day(b.lastAt)} ${hhmm(b.lastAt)} · ${b.count}× · pewność ${Math.round(b.score * 100)}%${b.pitchHz > 0 ? ' · ok. ' + Math.round(b.pitchHz) + ' Hz' : ''}</div></div>` +
+      (b.clip ? `<button class="act" onclick="new Audio('api/clips/${b.clip}').play()">▶</button>` : '') +
+      `<button class="act" onclick="tagForm('${b.id}', this)">${d ? 'Zmień' : 'Kto to?'}</button></div>`});
+  });
+  if (filter === 'all' || filter === 'planes') journal.planes.filter(p => p.heard).forEach(p => rows.push({at: p.lastAt, html:
+    `<div class="row">${art('PLANE', (p.typeCode || p.title) + '-' + (p.airlineIcao || p.airline || 'plain'), p.title, '&airline=' + encodeURIComponent(p.airline))}<div class="t">${esc(p.title)} · ${esc(p.callsign)}<div class="d">${day(p.lastAt)} ${hhmm(p.lastAt)} · ${esc([p.airline, p.route].filter(Boolean).join(' · '))} · ${p.minDistKm.toFixed(1)} km${p.minAltM != null ? ', ' + p.minAltM + ' m' : ''}</div></div></div>`}));
+  if (filter === 'all' || filter === 'sounds') journal.sounds.forEach(e => {
+    const s = sounds[e.key];
+    if (!s || !s.on) return;
+    const key = e.variant ? e.key + '-' + e.variant : e.key;
+    rows.push({at: e.lastAt, html:
+      `<div class="row">${art('SCENE', key, s.now)}<div class="t">${esc(s.past)}${e.title ? ': ' + esc(e.title) : ''}<div class="d">${day(e.at)} ${hhmm(e.at)}–${hhmm(e.lastAt)}${e.subtitle ? ' · ' + esc(e.subtitle) : ''}</div></div></div>`});
+  });
+  rows.sort((a, b) => b.at - a.at);
+  $('#entries').innerHTML = rows.slice(0, 400).map(r => r.html).join('') || '<p class="soft">Jeszcze pusto.</p>';
+  $('#dogs').innerHTML = filter !== 'dogs' ? '' : journal.dogs.length === 0
+    ? '<p class="soft">Rasy nie da się odczytać z samego szczekania. Przy szczekaniu naciśnij „Kto to?” i podaj imię i rasę psa: od tej pory dodatek rozpozna go sam.</p>'
+    : journal.dogs.map(d => `<div class="row">${art('DOG', d.breed, d.breedEn)}<div class="t">${esc(d.name)}<div class="d">${esc(d.breed)} · próbek: ${d.samples.length}</div></div><button class="act" onclick="deleteDog('${d.id}')">Usuń</button></div>`).join('') + '<h2>Szczekania</h2>';
+}
+
+function mongrel(size) {
+  const i = size === 'duży' ? 2 : size === 'mały' ? 0 : 1;
+  return breeds[i] ? [breeds[i].pl, breeds[i].en] : ['Kundel średni', 'a medium-sized mixed-breed dog'];
+}
+
+function tagForm(barkId, btn) {
+  document.querySelectorAll('.tag').forEach(x => x.remove());
+  const known = journal.dogs.map(d => `<button class="act" onclick="tag('${barkId}','${d.id}')">${esc(d.name)} (${esc(d.breed)})</button>`).join(' ');
+  const div = document.createElement('div');
+  div.className = 'tag';
+  div.innerHTML = (known ? 'Znane psy: ' + known + '<br>' : '') +
+    `Nowy pies: <input id="dn" placeholder="imię, np. Burek zza płotu"> <select id="db">${breeds.map(b => `<option>${esc(b.pl)}</option>`).join('')}</select> <button class="act" onclick="newDog('${barkId}')">Zapisz</button>`;
+  btn.closest('.row').after(div);
+}
+async function tag(barkId, dogId) { await api(`api/barks/${barkId}/tag`, {method: 'POST', body: JSON.stringify({dogId})}); version = -1; tick(); }
+async function newDog(barkId) {
+  const breed = breeds.find(b => b.pl === $('#db').value);
+  const {id} = await api('api/dogs', {method: 'POST', body: JSON.stringify({name: $('#dn').value || breed.pl, breed: breed.pl, breedEn: breed.en})});
+  tag(barkId, id);
+}
+async function deleteDog(id) { await fetch('api/dogs/' + id, {method: 'DELETE'}); version = -1; tick(); }
+
+async function renderSettings() {
+  const s = await api('api/settings');
+  const list = await api('api/sounds');
+  const slider = (k, label, min, max, step, fmt = v => v) =>
+    `<label class="set">${label}: <b id="v_${k}">${fmt(s[k])}</b><input type="range" min="${min}" max="${max}" step="${step}" value="${s[k]}" oninput="document.getElementById('v_${k}').textContent=(${fmt.toString()})(+this.value)" onchange="save({${k}: +this.value})"></label>`;
+  const toggle = (k, label) => `<label class="set">${label}<input type="checkbox" ${s[k] ? 'checked' : ''} onchange="save({${k}: this.checked})"></label>`;
+  const pct = v => Math.round(v * 100) + '%';
+  $('#settings').innerHTML = `
+    <h2>Ptaki</h2>${slider('bird_threshold', 'Minimalna pewność BirdNET', .3, .95, .01, pct)}${toggle('range_filter', 'Tylko gatunki występujące tu o tej porze roku')}
+    <h2>Psy</h2>${slider('bark_threshold', 'Próg szczekania', .1, .9, .01, pct)}${slider('dog_match', 'Dopasowanie do znanego psa', .6, .98, .01, pct)}
+    <h2>Samoloty</h2>${slider('radius_km', 'Promień (km)', 3, 60, 1)}${slider('overhead_max_alt_m', '„Nad głową” poniżej (m)', 500, 12000, 250)}
+    <h2>Pociągi</h2>${toggle('trains', 'Rozpoznawaj pociągi z rozkładu PKP PLK')}
+    <h2>Rycina</h2>${slider('lookback_hours', 'Pokazuj ostatnie (godz.)', 1, 72, 1)}
+    <label class="set">Generowanie rycin<select onchange="save({image_provider: this.value})">${['openai', 'gemini', 'openrouter', 'none'].map(p => `<option ${p === s.image_provider ? 'selected' : ''}>${p}</option>`).join('')}</select></label>
+    <p class="soft">${s.providerReady ? 'Klucz dla wybranego dostawcy jest ustawiony.' : 'Brak klucza: wpisz go w konfiguracji dodatku (Ustawienia → Dodatki → Ryciny → Konfiguracja).'}</p>
+    <h2>Dźwięki okolicy</h2><p class="soft">Wyłączone nie są zapisywane i znikają z ryciny i Dziennika.</p>
+    ${list.map(x => `<label class="set">${esc(x.now)}<input type="checkbox" ${x.on ? 'checked' : ''} onchange="soundSwitch('${x.key}', this.checked)"></label>`).join('')}
+    <h2>Na dashboardzie Home Assistant</h2>
+    <p class="soft">Rycina jest obrazem pod adresem <code>http://&lt;adres HA&gt;:8099/api/plate.png?w=1600&h=900</code>. Dodaj go jako kamerę (Ustawienia → Urządzenia → Dodaj integrację → Generic Camera, „Still image URL”) i połóż na dashboardzie kartą „Picture entity”. Ten panel jest też w bocznym menu jako „Ryciny”.</p>
+    <p class="soft">Dodatek ${esc(s.version)} · lokalizacja ${s.lat.toFixed(3)}, ${s.lon.toFixed(3)}</p>`;
+}
+async function save(values) { await api('api/settings', {method: 'PUT', body: JSON.stringify(values)}); version = -1; }
+async function soundSwitch(key, on) {
+  const s = await api('api/settings');
+  const off = new Set(s.sounds_off), onSet = new Set(s.sounds_on);
+  if (on) { off.delete(key); onSet.add(key); } else { onSet.delete(key); off.add(key); }
+  await save({sounds_off: [...off], sounds_on: [...onSet]});
+  sounds[key].on = on;
+}
+
+(async () => {
+  breeds = await api('api/breeds');
+  (await api('api/sounds')).forEach(s => sounds[s.key] = s);
+  show(['plate', 'journal', 'settings'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'plate');
+  tick();
+  setInterval(tick, 10000);
+})();
+</script>
+</body>
+</html>

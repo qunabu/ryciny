@@ -44,6 +44,9 @@ import pl.wojczal.ryciny.data.Bark
 import pl.wojczal.ryciny.data.Sound
 import pl.wojczal.ryciny.data.PlanePass
 import pl.wojczal.ryciny.planes.art
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 import java.io.File
 
 private sealed interface Entry { val at: Long }
@@ -147,7 +150,15 @@ private fun BarkLine(g: Graph, bark: Bark, dog: String?, onTag: () -> Unit) {
         ArtRequest(Kind.DOG, breed.first, breed.second), fetch = false,
     ) {
         bark.clip?.let { name ->
-            IconButton(onClick = { play(File(g.store.clips, name)) }) { Icon(Icons.Default.PlayArrow, "Odtwórz") }
+            IconButton(onClick = {
+                val local = File(g.store.clips, name)
+                if (local.exists() || !g.store.remote) {
+                    play(local)
+                } else {
+                    // Home Assistant mode: the clip lives on the add-on.
+                    g.scope.launch { g.remote.clip(name, File(g.context.cacheDir, "clips/$name"))?.let { f -> withContext(Dispatchers.Main) { play(f) } } }
+                }
+            }) { Icon(Icons.Default.PlayArrow, "Odtwórz") }
         }
         TextButton(onClick = onTag) { Text(if (dog == null) "Kto to?" else "Zmień") }
     }

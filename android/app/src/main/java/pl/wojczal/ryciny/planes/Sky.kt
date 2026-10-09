@@ -93,10 +93,15 @@ class Sky(
     init {
         scope.launch {
             while (true) {
-                if (holders.value.isNotEmpty()) poll()
+                // In Home Assistant mode the add-on polls and the phone only shows its sky.
+                if (holders.value.isNotEmpty() && settings.value.source != "server") poll()
                 delay(POLL_MS)
             }
         }
+    }
+
+    fun setRemote(s: SkyState) {
+        state.value = s
     }
 
     fun setActive(holder: String, on: Boolean) = holders.update { if (on) it + holder else it - holder }

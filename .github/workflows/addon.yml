@@ -1,0 +1,22 @@
+# The Home Assistant add-on: Python tests and a Docker build, on every change under homeassistant/.
+name: Add-on
+
+on:
+  pull_request:
+    paths: ["homeassistant/**", "shared/**"]
+  push:
+    branches: [main]
+    paths: ["homeassistant/**", "shared/**"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - run: pip install -r homeassistant/ryciny/app/requirements.txt pytest
+      - run: python -m pytest -q homeassistant/ryciny/tests
+      - name: Docker build (amd64)
+        run: docker build --build-arg BUILD_FROM=ghcr.io/home-assistant/amd64-base-debian:bookworm -t ryciny-ha homeassistant/ryciny

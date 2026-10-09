@@ -166,8 +166,11 @@ którego używają integracje Home Assistant ([samsungtvws](https://github.com/x
 
 ## Home Assistant
 
-Plan przeniesienia nasłuchu na komputer z Home Assistant (HA OS), z telefonem tylko jako ekranem:
-[plan.md](plan.md). Czeka na mikrofon.
+Dodatek **Ryciny** robi na komputerze z Home Assistant to samo co telefon: słucha mikrofonu, rozpoznaje i prowadzi
+Dziennik. Telefon (Ustawienia → Źródło danych → Home Assistant) tylko wyświetla, a w HA jest panel „Ryciny”
+z ryciną, Dziennikiem i ustawieniami. Instalacja: Ustawienia → Dodatki → Sklep → Repozytoria →
+`https://github.com/qunabu/ryciny`. Szczegóły: [homeassistant/ryciny/DOCS.md](homeassistant/ryciny/DOCS.md),
+plan dalszych kroków: [plan.md](plan.md).
 
 ## Etap 2: Raspberry Pi + kolorowy e-ink
 

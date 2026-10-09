@@ -107,7 +107,7 @@ fun PlateScreen(g: Graph) {
         }
 
         Spacer(Modifier.height(18.dp))
-        LiveStrip(live.listening, live.sound, live.error)
+        LiveStrip(live.listening, live.sound, live.error, fromServer = settings.source == "server")
         Spacer(Modifier.height(8.dp))
         Caption(
             "Ryciny ptaków: fugleramme (CC BY-SA 4.0), tablice z domeny publicznej · rozpoznawanie: BirdNET, YAMNet · " +
@@ -176,11 +176,11 @@ private fun DogPlate(g: Graph, dog: Dog?, barks: List<Bark>) {
 }
 
 @Composable
-private fun LiveStrip(listening: Boolean, sound: String, error: String?) {
+private fun LiveStrip(listening: Boolean, sound: String, error: String?, fromServer: Boolean) {
     val context = LocalContext.current
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Caption(
-            when {
+            (if (fromServer) "Home Assistant: " else "") + when {
                 error != null -> "nasłuch przerwany: $error"
                 listening -> "● nasłuch trwa" + if (sound.isNotBlank()) " · słychać: $sound" else ""
                 else -> "○ nasłuch wyłączony"
@@ -189,7 +189,9 @@ private fun LiveStrip(listening: Boolean, sound: String, error: String?) {
             color = if (listening) Rubric else InkSoft,
         )
         Spacer(Modifier.height(6.dp))
-        if (listening) {
+        if (fromServer) {
+            // The add-on's microphone is switched in Home Assistant, not here.
+        } else if (listening) {
             OutlinedButton(onClick = { ListenService.stop(context) }) { Text("Zatrzymaj nasłuch") }
         } else {
             Button(onClick = { ListenService.start(context) }) { Text("Włącz nasłuch") }

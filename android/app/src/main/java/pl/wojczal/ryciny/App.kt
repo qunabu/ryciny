@@ -43,6 +43,12 @@ class Graph(val context: Context) {
     val rails = Rails(context, settings, place, scope)
     val live = MutableStateFlow(Live())
 
+    /** Home Assistant mode: the add-on listens, this phone shows. Idle in the default phone mode. */
+    val remote = pl.wojczal.ryciny.data.Remote(settings, store, live, { sky.setRemote(it) }, scope).also {
+        store.server = it
+        art.server = it
+    }
+
     init {
         // Sounds and dog breeds are a short, fixed list, so each gets its engraving as soon as it is first
         // heard, in the background: the journal's thumbnails then never wait for a visit to the plate.
