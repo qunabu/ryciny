@@ -8,6 +8,17 @@ tag w gicie to `vX.Y.Z`, a każdy tag ma release z plikiem APK.
 
 
 
+## 0.28.0 - 2026-10-20
+
+PR #10–#13 (Paweł Klimkowski):
+- Strona publiczna: linki „Dodaj gwiazdkę” i „Forkuj projekt” (#10); tytuł strony z ustawień dodatku (#11);
+  animacja miniatury trwa w trakcie odsłuchu nagrania, odsłuch z pauzą i wznowieniem, poprawione proporcje (#13).
+  Animacje dalej domyślnie zatrzymane, z informacją pod przyciskiem (decyzja właściciela; #13 włączał je domyślnie).
+- Panel HA: zmiana lokalizacji nasłuchu i tytułu strony w Ustawieniach (#11); samoloty, pociągi, pogoda i filtr
+  ptaków przeliczają się po zmianie. Współrzędne nie trafiają na stronę.
+- Animacje: 20 nowych ptaków, 77 paczek (#12); kremowa obwódka (#F2EDE3) wokół klatek, nowe paczki dostają ją
+  automatycznie przy wczytaniu (#13).
+
 ## 0.27.0 - 2026-10-20
 
 - Dodatek: `prefer_bundled_art` (panel: Ustawienia → Animowana rycina → „Ryciny z gotowymi animacjami zamiast

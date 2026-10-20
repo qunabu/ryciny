@@ -36,7 +36,7 @@ function classListFor(owner) {
   };
 }
 
-function createRuntime({ savedPause = null, reducedMotion = false, spriteLoads = true, rejectPlay = false } = {}) {
+function createRuntime({ savedPause = '0', reducedMotion = false, spriteLoads = true, rejectPlay = false } = {}) {
   /*
    * Provide only the browser surface exercised by the viewer state machine.
    * The fetch promise stays pending so startup rendering cannot obscure the
@@ -229,8 +229,8 @@ async function flush() {
   await new Promise(resolve => setImmediate(resolve));
 }
 
-test('animation preference is enabled by default and honors explicit saved pause', () => {
-  assert.equal(createRuntime().viewer.getPaused(), false);
+test('animations start paused unless this browser switched them on', () => {
+  assert.equal(createRuntime({savedPause: null}).viewer.getPaused(), true);
   assert.equal(createRuntime({savedPause: '0'}).viewer.getPaused(), false);
   assert.equal(createRuntime({savedPause: '1'}).viewer.getPaused(), true);
 });
