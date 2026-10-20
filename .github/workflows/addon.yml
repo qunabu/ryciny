@@ -9,6 +9,8 @@ on:
       - "public-site/title.test.mjs"
       - "shared/**"
       - "tools/generate_animation.py"
+      - "tools/add_sticker_borders.py"
+      - "tools/sticker_contour.py"
       - "docs/animation-atlases/**"
       - "docs/animation-preparation.md"
   push:
@@ -19,6 +21,8 @@ on:
       - "public-site/title.test.mjs"
       - "shared/**"
       - "tools/generate_animation.py"
+      - "tools/add_sticker_borders.py"
+      - "tools/sticker_contour.py"
       - "docs/animation-atlases/**"
       - "docs/animation-preparation.md"
 
