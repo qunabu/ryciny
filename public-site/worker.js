@@ -160,7 +160,7 @@ h2{font-weight:400;font-size:24px;border-bottom:1px solid var(--rule);margin:34p
 .arrow{font:inherit;font-size:16px;background:none;border:1px solid var(--rule);color:var(--ink);padding:2px 12px;border-radius:14px;cursor:pointer}
 .arrow:disabled{opacity:.3;cursor:default}
 .top a,.row a{color:inherit;text-decoration-color:var(--rule)}
-.repo-actions{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:-4px 0 18px}
+.repo-actions{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:12px 0 0}
 .repo-actions a{display:inline-block;border:1px solid var(--rule);border-radius:14px;padding:3px 12px;color:var(--rubric);font-size:16px;text-decoration:none}
 .repo-actions a:hover,.repo-actions a:focus-visible{background:var(--rubric);color:var(--paper)}
 .pager{margin-top:14px;justify-content:center;align-items:center}
@@ -190,12 +190,8 @@ a{color:var(--rubric)}
 <main>
   <h1 id="stationTitle">Dźwięki Dolnego Migowa</h1>
   <p class="sub">Mikrofon za oknem słucha ptaków, samolotów i okolicy · <span id="upd">…</span></p>
-  <nav class="repo-actions" aria-label="Projekt na GitHubie">
-    <a href="https://github.com/qunabu/ryciny" aria-label="Dodaj gwiazdkę projektowi Ryciny na GitHubie">★ Dodaj gwiazdkę</a>
-    <a href="https://github.com/qunabu/ryciny/fork" aria-label="Utwórz fork projektu Ryciny na GitHubie">Forkuj projekt</a>
-  </nav>
   <nav class="filters top" id="filters"></nav>
-  <p class="note" id="animNote" hidden>Niektóre ryciny są ruchome. Animacje są domyślnie zatrzymane; włączysz je przyciskiem <b>▶</b> na górze.</p>
+  <p class="note" id="animNote" hidden>Niektóre ryciny są ruchome. Animacje są domyślnie wyłączone; możesz je włączyć przyciskiem <b>▶</b> na górze, a ta przeglądarka zapamięta Twój wybór.</p>
   <section class="plate" id="plate"><p class="soft">Wczytuję…</p></section>
 
   <h2>Statystyki</h2>
@@ -225,6 +221,10 @@ a{color:var(--rubric)}
     nie obserwacja ornitologa. Ryciny ptaków: <a href="https://fugleramme.no/">fugleramme</a> (CC BY-SA 4.0) i tablice z domeny
     publicznej; ryciny samolotów i dźwięków generowane. Samoloty: adsb.lol, adsbdb. Nagrania 9 s, sprawdzane automatycznie, czy nie słychać w nich ludzi ani muzyki; 14 dni.
     · <a href="https://github.com/qunabu/ryciny">Ryciny na GitHubie</a>
+    <nav class="repo-actions" aria-label="Projekt na GitHubie">
+    <a href="https://github.com/qunabu/ryciny" aria-label="Dodaj gwiazdkę projektowi Ryciny na GitHubie">★ Dodaj gwiazdkę</a>
+    <a href="https://github.com/qunabu/ryciny/fork" aria-label="Utwórz fork projektu Ryciny na GitHubie">Forkuj projekt</a>
+  </nav>
   </footer>
 </main>
 <script>
