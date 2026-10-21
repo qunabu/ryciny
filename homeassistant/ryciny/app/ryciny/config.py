@@ -35,7 +35,7 @@ class Config:
     gemini_model: str = "gemini-2.5-flash-image"
     openrouter_key: str = ""
     openrouter_model: str = "google/gemini-2.5-flash-image"
-    bird_threshold: float = 0.7
+    bird_threshold: float = 0.85
     range_filter: bool = True
     bark_threshold: float = 0.35
     dog_match: float = 0.85

@@ -8,6 +8,12 @@ tag w gicie to `vX.Y.Z`, a każdy tag ma release z plikiem APK.
 
 
 
+## 0.29.0 - 2026-10-21
+
+- Próg BirdNET domyślnie 85% (było 70%). Ptaki zapisane wcześniej z mniejszą pewnością są ukryte wszędzie (panel,
+  aplikacja w trybie HA, strona publiczna, telewizor, statystyki), ale nie skasowane: obniżenie progu je przywraca.
+- Wyłączone w dodatku (ustawienia): świerszcze, krowa, pszczoły.
+
 ## 0.28.0 - 2026-10-20
 
 PR #10–#13 (Paweł Klimkowski):

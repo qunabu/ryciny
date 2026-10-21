@@ -92,9 +92,9 @@ class Publisher:
                     continue
                 if self.sent is None:
                     self.sent = set(json.loads(self._put("/ingest/has", b"", "text/plain")))
-                journal = self.app.store.snapshot()
+                journal = self.app.journal()
                 state = public_state(journal, self.app.sounds, self.app.sound_on, title)
-                st = stats.compute(journal, self.app.store.history_snapshot(), self.app.sounds, self.app.sound_on, PRIVATE_SOUNDS,
+                st = stats.compute(journal, self.app.history(journal), self.app.sounds, self.app.sound_on, PRIVATE_SOUNDS,
                                    best=self.app.store.best_snapshot())
                 # Only best recordings without people or music go out; they stay (no 14-day expiry).
                 st["birds"]["best"] = {s: {k: v for k, v in b.items() if k != "public"} for s, b in st["birds"]["best"].items() if b["public"]}

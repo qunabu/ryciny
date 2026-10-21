@@ -45,7 +45,7 @@ class App:
     def current_plate(self) -> dict | None:
         """Select one current plate for both the static background and animation descriptor."""
 
-        journal = self.store.snapshot()
+        journal = self.journal()
         current = plate.newest(journal, self.sounds, self.cfg.lookback_hours, self.sound_on)
         dog = self.tv_dog(journal, self.cfg.lookback_hours)
         return dog if dog and (current is None or dog["at"] > current["at"]) else current
@@ -148,9 +148,31 @@ class App:
             return True
         return s.get("enabled", True)
 
+    def journal(self) -> dict:
+        """The journal as shown everywhere: birds below the BirdNET threshold (bird_threshold) are hidden, not deleted."""
+        j = self.store.snapshot()
+        j["birds"] = [b for b in j["birds"] if b.get("conf", 1.0) >= self.cfg.bird_threshold]
+        return j
+
+    def history(self, journal: dict | None = None) -> dict:
+        """Bird history for the statistics, without species/days whose entries are all hidden by the threshold.
+
+        Only days the journal still covers can be checked; older days were recorded with the threshold already set."""
+        h = self.store.history_snapshot()
+        everything = self.store.snapshot()["birds"]
+        if not everything:
+            return h
+        shown = journal if journal is not None else self.journal()
+        first = min(store.local(b["at"]).strftime("%Y-%m-%d") for b in everything)
+        keep: dict[str, set[str]] = {}
+        for b in shown["birds"]:
+            for t in (b["at"], b["lastAt"]):
+                keep.setdefault(store.local(t).strftime("%Y-%m-%d"), set()).add(b["sci"])
+        return {d: (v if d < first else {s: x for s, x in v.items() if s in keep.get(d, set())}) for d, v in h.items()}
+
     def wanted(self, since: int) -> list[tuple]:
         """Return exact still identities for observations seen since a bounded cursor."""
-        j = self.store.snapshot()
+        j = self.journal()
         dogs = {d["id"]: d for d in j["dogs"]}
         out = [("BIRD", b["sci"], b["sci"], "", "") for b in j["birds"] if b["lastAt"] >= since]
         for p in j["planes"]:
@@ -176,7 +198,7 @@ class App:
     def tv_plate(self, wait: bool) -> tuple[bytes, str, str]:
         """The TV picture now: (jpeg, identity, title). A wall should not go blank after a quiet night: a week back."""
         # Only animals on the wall: birds, animal sounds and dogs; no planes, trains, weather or people.
-        j = self.store.snapshot()
+        j = self.journal()
         current = plate.newest({**j, "planes": []}, self.sounds, 7 * 24, lambda k: k in ANIMAL_SOUNDS and self.sound_on(k))
         dog = self.tv_dog(j)
         if dog and (current is None or dog["at"] > current["at"]):
@@ -190,7 +212,7 @@ class App:
             engraving = Image.open(f) if f else None
             if current["kind"] == "BIRD":
                 about = self.wiki.about(current["key"])
-        st = stats.compute(j, self.store.history_snapshot(), self.sounds, self.sound_on)
+        st = stats.compute(j, self.history(j), self.sounds, self.sound_on)
         start = int(dt.datetime.now(store.ZONE).replace(hour=0, minute=0, second=0, microsecond=0).timestamp() * 1000)
         st["animals"] = {
             "barksToday": sum(1 for b in j["barks"] if b["lastAt"] >= start),
@@ -295,10 +317,10 @@ class App:
                     if path == "/api/health":
                         return self._json({"ok": True, "version": __version__})
                     if path == "/api/journal":
-                        etag = f'"{app.store.version}"'
+                        etag = f'"{app.store.version}-{app.cfg.bird_threshold}"'
                         if self.headers.get("If-None-Match") == etag:
                             return self._send(304, b"", "application/json", {"ETag": etag})
-                        return self._json(app.store.snapshot(), headers={"ETag": etag})
+                        return self._json(app.journal(), headers={"ETag": etag})
                     if path == "/api/live":
                         mic = {"db": app.live.level_db(), "peak": round(app.listener.peak, 3) if app.listener else 0,
                                "has": bool(app.listener and app.listener.last is not None)}
@@ -317,7 +339,7 @@ class App:
                         return self._json({"status": app.frame.status, "paired": bool(app.frame.state.get("token")),
                                            "sentAt": int(app.frame.sent_at * 1000), "on": app.cfg.frame_on, "host": app.cfg.frame_host})
                     if path == "/api/stats":
-                        return self._json(stats.compute(app.store.snapshot(), app.store.history_snapshot(), app.sounds, app.sound_on,
+                        return self._json(stats.compute(app.journal(), app.history(), app.sounds, app.sound_on,
                                                         best=app.store.best_snapshot()))
                     if path == "/api/mic.wav":
                         last = app.listener.last if app.listener else None

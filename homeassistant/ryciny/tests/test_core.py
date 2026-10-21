@@ -182,3 +182,19 @@ def test_bundled_engraving_wins_only_when_preferred(tmp_path):
     assert art.cached("SCENE", "cat") == own
     art.cfg.prefer_bundled_art = True
     assert art.cached("SCENE", "cat") == bundled and own.exists()
+
+
+def test_birds_below_threshold_are_hidden_not_deleted(tmp_path):
+    from types import SimpleNamespace
+    from ryciny import store as st
+    from ryciny.api import App
+    s = st.Store(tmp_path)
+    t = st.now_ms()
+    s.add_bird("Pica pica", "sroka", 0.95, t)
+    s.add_bird("Bubo bubo", "puchacz", 0.72, t)
+    app = App.__new__(App)
+    app.store, app.cfg = s, SimpleNamespace(bird_threshold=0.85)
+    assert [b["sci"] for b in app.journal()["birds"]] == ["Pica pica"]
+    assert [b["sci"] for b in s.snapshot()["birds"]] == ["Pica pica", "Bubo bubo"]
+    day = st.local(t).strftime("%Y-%m-%d")
+    assert set(app.history()[day]) == {"Pica pica"}

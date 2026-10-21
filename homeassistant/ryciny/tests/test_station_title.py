@@ -40,6 +40,8 @@ def _journal_app(tmp_path, title=config.DEFAULT_STATION_TITLE):
         store=store,
         sounds={},
         sound_on=lambda _key: True,
+        journal=lambda: journal,
+        history=lambda _journal=None: {},
     )
     return app
 

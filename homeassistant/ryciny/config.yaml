@@ -1,5 +1,5 @@
 name: Ryciny
-version: "0.28.0"
+version: "0.29.0"
 slug: ryciny
 description: Ptaki, psy, samoloty, pociągi i dźwięki okolicy jako XIX-wieczne ryciny. Słucha mikrofonu, aplikacja tylko wyświetla.
 url: https://github.com/qunabu/ryciny
@@ -28,7 +28,7 @@ options:
   gemini_model: gemini-2.5-flash-image
   openrouter_key: ""
   openrouter_model: google/gemini-2.5-flash-image
-  bird_threshold: 0.7
+  bird_threshold: 0.85
   range_filter: true
   bark_threshold: 0.35
   dog_match: 0.85
